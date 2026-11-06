@@ -1,0 +1,14 @@
+{
+  "name": "iqra-quiz-studio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Quiz Studio - make quizzes, share a private link, print papers and read results.",
+  "scripts": {
+    "start": "npx http-server . -p 8000 -c-1"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.0",
+    "@capacitor/cli": "^6.1.0",
+    "@capacitor/core": "^6.1.0"
+  }
+}
