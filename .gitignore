@@ -1,7 +1,0 @@
-node_modules/
-www/
-android/
-desktop/dist/
-desktop/node_modules/
-*.keystore
-.DS_Store
