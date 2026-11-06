@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- who is an admin: EDIT THIS LIST (lower-case Google e-mails). Keep it the same as "admins" in config.js ----
+    function signed() { return request.auth != null && request.auth.token.email_verified == true; }
+    function me() { return request.auth.token.email.lower(); }
+    function isMaster() { return signed() && me() in ['zahidulislam1801@gmail.com','iqravocab@gmail.com']; }
+
+    // admin drafts
+    match /quizzes/{id} {
+      allow read, write: if isMaster();
+    }
+
+    // a published quiz link (a copy of the quiz); anyone with the code can read it while it is on and not expired
+    match /qlinks/{code} {
+      allow list, create, update, delete: if isMaster();
+      allow get: if isMaster()
+        || (resource.data.on == true
+            && (resource.data.exp == 0 || resource.data.exp > request.time.toMillis()));
+    }
+
+    // one submission per person per link
+    match /qresp/{code}/r/{uid} {
+      allow read: if isMaster() || (request.auth != null && request.auth.uid == uid);
+      allow create: if request.auth != null && request.auth.uid == uid
+        && get(/databases/$(database)/documents/qlinks/$(code)).data.on == true;
+      allow update: if false;
+      allow delete: if isMaster();
+    }
+
+    // certificate verification pages (?v=)
+    match /qverify/{id} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if isMaster()
+        || (request.auth != null
+            && request.resource.data.uid == request.auth.uid
+            && id == request.resource.data.code + '_' + request.auth.uid
+            && request.resource.data.keys().hasOnly(['code','uid','name','title','score','total','pct','at','t'])
+            && exists(/databases/$(database)/documents/qresp/$(request.resource.data.code)/r/$(request.auth.uid))
+            && get(/databases/$(database)/documents/qresp/$(request.resource.data.code)/r/$(request.auth.uid)).data.score == request.resource.data.score
+            && get(/databases/$(database)/documents/qresp/$(request.resource.data.code)/r/$(request.auth.uid)).data.total == request.resource.data.total);
+      allow update: if isMaster();
+      allow delete: if isMaster();
+    }
+
+    // sign-in hand-over for the Android / Windows apps (short-lived, one code per sign-in)
+    match /authlink/{code} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['idToken','t'])
+        && request.resource.data.idToken is string
+        && request.resource.data.idToken.size() < 4000;
+      allow delete: if true;
+    }
+  }
+}
