@@ -38,7 +38,7 @@ jobs:
       - name: Copy web files
         run: |
           mkdir www
-          cp index.html config.js shell.js studio.js manifest.webmanifest logo.svg www/
+          cp index.html config.js manifest.webmanifest logo.svg www/
           cp apple-touch-icon.png icon-192.png icon-512.png icon-maskable-512.png www/
 
       - name: Install and create Android project
