@@ -1,6 +1,6 @@
 /* Quiz Studio offline cache.  Change VERSION whenever you want every device to re-download the files. */
 var VERSION='qs-1';
-var SHELL=['./','index.html','config.js','shell.js','studio.js','manifest.webmanifest','icon-192.png'];
+var SHELL=['./','index.html','config.js','manifest.webmanifest','icon-192.png'];
 self.addEventListener('install',function(e){e.waitUntil(caches.open(VERSION).then(function(c){return Promise.all(SHELL.map(function(u){return c.add(u).catch(function(){});}));}).then(function(){return self.skipWaiting();}));});
 self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(k){return Promise.all(k.filter(function(x){return x!==VERSION;}).map(function(x){return caches.delete(x);}));}).then(function(){return self.clients.claim();}));});
 function putSafe(req,res){if(res&&res.ok){var c=res.clone();caches.open(VERSION).then(function(x){x.put(req,c);}).catch(function(){});}return res;}
