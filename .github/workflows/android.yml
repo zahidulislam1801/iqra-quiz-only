@@ -99,7 +99,7 @@ jobs:
         run: |
           sed -i "s/versionCode 1/versionCode ${{ github.run_number }}/" android/app/build.gradle
           if [ -z "$KEYSTORE_BASE64" ]; then
-            echo "::warning::No KEYSTORE_BASE64 secret. The APK is signed with a temporary key, so each new build must be installed after removing the old app. See SETUP-BN.md, step about the signing key."
+            echo "::warning::No KEYSTORE_BASE64 secret. The APK is signed with a temporary key, so each new build must be installed after removing the old app. See SETUP.md, step 6.1."
             exit 0
           fi
           echo "$KEYSTORE_BASE64" | base64 -d > android/app/quiz.keystore
