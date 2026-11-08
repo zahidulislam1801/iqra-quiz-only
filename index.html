@@ -1441,12 +1441,6 @@ function studio(){
     function hd(sub,back){bx.innerHTML='';bx.append(E('div',{class:'qhead'},E('img',{src:'/icon-192.png',alt:''}),E('div',null,E('h2',null,'OMR scanner'),E('div',{class:'qm'},sub)),E('button',{class:'q-btn g',style:'margin:0',onclick:back||close},back?'\u2039 Back':'Close')));}
     function sorted(){return list.slice().sort(function(a,b){return b.tot-a.tot||String(a.name).localeCompare(String(b.name));});}
     
-/* ===== notices: one place for send / questions ===== */
-var _vn=V.notices;V.notices=function(m,p){var r=_vn(m,p);if(S.mode!=='student'){var row=E('div',{class:'qgrid qg2',style:'margin:0 0 10px'},E('button',{class:'q-btn',onclick:function(){go('compose');}},X('Send a notice','নোটিশ পাঠান')),E('button',{class:'q-btn g',onclick:function(){go('queries');}},X('Questions & answers','প্রশ্ন ও উত্তর')));m.insertBefore(row,m.children[1]||null);}return r;};
-/* old demo records are removed once, silently */
-var DI='demo_inst',DX='demo_exam';
-function demoCleanup(){if(!(S.admin&&!S.va)||!(S.insts||[]).some(function(i){return i.id===DI;}))return;var f=S.f,fs=f.fs,db=f.db;
-  feeDocs([fs.where('instId','==',DI)]).catch(function(){return [];}).then(function(fees){var b=fs.writeBatch(db),k;fees.forEach(function(r){b.delete(fs.doc(db,'fees',r.id));});for(k=1;k<=6;k++)b.delete(fs.doc(db,'exams',DX,'marks','demo_s'+k));b.delete(fs.doc(db,'results',DX));b.delete(fs.doc(db,'exams',DX));b.delete(fs.doc(db,'institutions',DI));return b.commit();}).then(function(){return loadInsts();}).catch(function(){});}
 function start(){stop();pend=null;hd(cut(Z.title,32)+' \u00B7 '+G.n+' MCQ rows');
       if(!G.n){bx.append(E('div',{class:'qt h2'},E('h3',null,'No MCQ questions'),E('p',{class:'qm'},'Only multiple choice, checkbox and True / False questions have OMR rows.')));return;}
       var file=E('input',{type:'file',accept:'image/*,application/pdf',multiple:true,style:'display:none',onchange:function(){var fs=[].slice.call(this.files||[]);this.value='';if(fs.length)many(fs);}}),
@@ -1932,6 +1926,7 @@ function ic(k){var n=ICO[k]?k:(ICM[(k||'').codePointAt(0)]||'home'),d=ICO[n],s=d
 function phLine(u){var a=[];if(u.phone)a.push(u.phone+(u.wa==='phone'?' · WhatsApp':''));if(u.phone2)a.push(u.phone2+(u.wa==='phone2'?' · WhatsApp':''));return a.join('  |  ');}
 /* ===== institutions, head, fees ===== */
 function loadInsts(){var f=S.f;return f.fs.getDocs(f.fs.collection(f.db,'institutions')).then(function(s){S.insts=[];s.forEach(function(d){S.insts.push(Object.assign({id:d.id},d.data()));});},function(){S.insts=[];});}
+function defInstId(strict){var L=(S.insts||[]).filter(function(i){return i.id!=='demo_inst';}),a=L.filter(function(i){return /pathfinder|cadet|পাথফাইন্ডার|ক্যাডেট/i.test((i.nameEn||'')+' '+(i.nameBn||''));});return a[0]?a[0].id:(strict?'':(L[0]?L[0].id:''));}
 function instName(i){return i?(LANG==='bn'?(i.nameBn||i.nameEn):(i.nameEn||i.nameBn))||'':'';}
 function curInst(){var id=S.head||S.fi||'';return (S.insts||[]).filter(function(i){return i.id===id;})[0]||null;}
 function money(n){return '\u09F3'+(Math.round(n)||0).toLocaleString('en-US');}
@@ -2029,7 +2024,7 @@ function instForm(d,done){var f=S.f,fs={},bx=E('div'),o,logo=d.logo||'',ts=[],hs
 V.insts=function(m){head(m,X('Institutions & heads','প্রতিষ্ঠান ও প্রধান'),X('Set each institution up once — name, address and logo then flow everywhere','প্রতিষ্ঠান একবার সেটআপ করুন — নাম, ঠিকানা ও লোগো সব জায়গায় নিজে থেকে আসবে'));var f=S.f,box=E('div');
   m.appendChild(E('button',{class:'q-btn big',onclick:function(){instForm({},function(){go('insts');});}},'+ '+X('New institution','নতুন প্রতিষ্ঠান')));m.appendChild(box);box.appendChild(loadMsg());
   Promise.all([loadInsts(),usersBy('teacher')]).then(function(r){box.innerHTML='';if(!S.insts.length)box.appendChild(empty(X('No institutions yet.','এখনো কোনো প্রতিষ্ঠান নেই।')));
-    S.insts.forEach(function(i,k){var h=r[1].filter(function(u){return u.headOf===i.id;})[0];box.appendChild(E('div',{class:'qt h'+(k%4)},E('div',{class:'pt-pc'},logoBox(i.logo,52),E('div',{class:'pt-pi'},E('h3',{style:'margin:0'},instName(i)),E('div',{class:'qm'},[i.address,i.phone,i.eiin?'EIIN '+i.eiin:''].filter(Boolean).join(' · ')),E('div',{class:'qm'},X('Head: ','প্রধান: ')+(h?nm(h):'—')))),
+    S.insts.forEach(function(i,k){var h=r[1].filter(function(u){return u.headOf===i.id;})[0];box.appendChild(E('div',{class:'qt h'+(k%4)},E('div',{class:'pt-pc'},logoBox(i.logo,52),E('div',{class:'pt-pi'},E('h3',{style:'margin:0'},instName(i)),E('div',{class:'qm'},[i.address,i.phone,i.eiin?'EIIN '+i.eiin:''].filter(Boolean).join(' · ')),h?null:E('div',{class:'qm'},X('Head: —','প্রধান: —'))),h?E('div',{style:'margin-left:auto;text-align:center;flex:none;max-width:86px;padding-left:8px'},avatar(h,46),E('div',{class:'qm',style:'font-size:10px;line-height:1.2;margin-top:3px'},X('Head','প্রধান')),E('div',{style:'font-size:11px;font-weight:700;line-height:1.2'},nm(h))):null),
       E('div',{class:'qgrid qg3'},E('button',{class:'q-btn',onclick:function(){S.fi=i.id;go('hstud');}},X('Students','শিক্ষার্থী')),E('button',{class:'q-btn g',onclick:function(){instForm(i,function(){go('insts');});}},X('Edit','সম্পাদনা')),E('button',{class:'q-btn g',onclick:function(){S.fi=i.id;go('fees');}},X('Fees','ফি'))),
       E('button',{class:'q-btn r',style:'margin-top:6px',onclick:function(){if(confirm(X('Delete this institution record? Fee records are kept.','এই প্রতিষ্ঠান মুছবেন? ফি রেকর্ড থাকবে।')))f.fs.deleteDoc(f.fs.doc(f.db,'institutions',i.id)).then(function(){go('insts');},function(e){toast(errMsg(e));});}},X('Delete','মুছুন'))));});}).catch(fail);};
 V.isetup=function(m){head(m,X('Institution setup','প্রতিষ্ঠান সেটআপ'),X('Set once — used on every printout, ID card and screen','একবার দিন — সব প্রিন্ট, আইডি কার্ড ও স্ক্রিনে আসবে'));var inst=curInst();if(!inst){m.appendChild(empty(X('Institution not found.','প্রতিষ্ঠান পাওয়া যায়নি।')));return;}
@@ -2114,7 +2109,10 @@ function idCss3(){if(document.getElementById('pt-idc-css2'))return;var s=documen
 +".idc.b .bt{position:absolute;left:4.2mm;right:4.2mm;bottom:3.4mm;display:flex;align-items:flex-end;gap:2mm}"
 +".idc.b .qr{width:17mm;height:17mm;flex:none;border:.3mm solid #0a5a42;border-radius:1mm;padding:.4mm;background:#fff;box-sizing:border-box}.idc.b .qr svg{display:block;width:100%;height:100%}"
 +".idc.b .bt .ro{margin:0;flex:1;min-width:0}.idc.b .bt .sg{position:static;width:24mm;flex:none}.idc.b .bt .sp{flex:1}"
-+".idc.b.tc .tp{background:linear-gradient(135deg,#0b1633,#1a2f6b)}.idc.b.tc .tx b,.idc.b.tc .qr{color:#1a2f6b;border-color:#1a2f6b}";
++".idc.b.tc .tp{background:linear-gradient(135deg,#0b1633,#1a2f6b)}.idc.b.tc .tx b,.idc.b.tc .qr{color:#1a2f6b;border-color:#1a2f6b}"
++".idc .rn.st{padding:0;justify-content:stretch}.idc .rn.st>div{flex:1;height:100%;display:flex;flex-direction:column;justify-content:center;padding:0 4.8mm}.idc .rn.st>div+div{align-items:flex-end;border-left:.3mm solid #3a280040}"
++".idc .rn.st small{font-size:1.8mm;margin-bottom:.6mm}.idc .rn.st span{font:700 4mm/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.4mm}.idc .rn.st span.cl{font:700 3.6mm/1.1 'Hind Siliguri','Instrument Sans',system-ui,sans-serif;letter-spacing:0}"
++".idc.f:not(.tc) .ph{box-shadow:0 1.2mm 3mm #0007}.idc.f:not(.tc) .bd{top:14mm}.idc.f:not(.tc) .nx{font-size:4.6mm}";
 document.head.appendChild(s);}
 function qrText(u,inst){var T=u.role==='teacher',a=['IQRA '+(T?'TEACHER':'STUDENT')+' ID','Name: '+(u.nameEn||nm(u))];
   if(T){if(u.designation)a.push('Post: '+u.designation);}else{a.push('Class: '+(u.cls||'-')+' | Roll: '+(u.roll||'-'));if(u.father)a.push('Father: '+u.father);}
@@ -2122,13 +2120,13 @@ function qrText(u,inst){var T=u.role==='teacher',a=['IQRA '+(T?'TEACHER':'STUDEN
 function idCardOf(u,side){idCss3();var inst=(S.insts||[]).filter(function(i){return i.id===u.instId;})[0],o=inst?{n:instName(inst),a:LANG==='bn'?(inst.addressBn||inst.address):(inst.addressEn||inst.address),lg:inst.logo,ph:inst.phone}:{n:orgName(),a:(function(g){return LANG==='bn'?(g.subBn||g.sub):(g.subEn||g.sub);})(orgGet()),lg:orgGet().logo,ph:''},
     isT=u.role==='teacher',role=isT?(u.headOf?X('HEAD','প্রধান'):X('TEACHER','শিক্ষক')):X('STUDENT','শিক্ষার্থী'),lg=E('div',{class:'lg'},E('img',{src:o.lg||'icon-192.png',alt:''}));
   var el=E('div',{class:'idc '+side+(isT?' tc':'')});
-  if(side==='f'){var lines=[];if(isT){if(pv(u,'designation'))lines.push([X('Post','পদবি'),pv(u,'designation')]);}else{if(u.cls)lines.push([X('Class','শ্রেণি'),u.cls]);if(pv(u,'father'))lines.push([X('Father','পিতা'),pv(u,'father')]);}if(u.phone)lines.push([X('Mobile','মোবাইল'),u.phone]);
+  if(side==='f'){var lines=[];if(isT){if(pv(u,'designation'))lines.push([X('Post','পদবি'),pv(u,'designation')]);}else{if(pv(u,'father'))lines.push([X('Father','পিতা'),pv(u,'father')]);}if(u.phone)lines.push([X('Mobile','মোবাইল'),u.phone]);
     el.appendChild(E('div',{class:'ar'},'إقرأ'));
-    el.appendChild(E('div',{class:'hd'},lg,E('div',null,E('div',{class:'in'},o.n),E('div',{class:'tt'},isT?X('Staff identity card','শিক্ষক পরিচয়পত্র'):X('Identity card','পরিচয়পত্র')))));
+    el.appendChild(E('div',{class:'hd'},lg,E('div',null,E('div',{class:'in'},o.n),E('div',{class:'tt'},isT?X('Teacher identity card','শিক্ষক পরিচয়পত্র'):X('Student identity card','শিক্ষার্থী পরিচয়পত্র')))));
     el.appendChild(E('div',{class:'ph'},u.photo?E('img',{src:u.photo,alt:''}):(String(nm(u)).trim().charAt(0)||'?')));
     el.appendChild(E('div',{class:'bd'},E('div',{class:'nx'},nm(u)),E('div',{class:'rl'},role),lines.slice(0,3).map(function(l){return E('div',{class:'ln'},l[0]+': ',E('b',null,l[1]));})));
-    if(isT)el.appendChild(E('div',{class:'rn tr'},E('small',null,X('STAFF','কর্মী')),E('span',null,pv(u,'designation')||role)));
-    else el.appendChild(E('div',{class:'rn'},E('small',null,X('ROLL / ID','রোল / আইডি')),E('span',null,u.roll||'—')));
+    if(isT)el.appendChild(E('div',{class:'rn'},E('small',null,X('ID','আইডি')),E('span',null,u.roll||'—')));
+    else el.appendChild(E('div',{class:'rn st'},E('div',null,E('small',null,X('CLASS','শ্রেণি')),E('span',{class:'cl'},u.cls||'—')),E('div',null,E('small',null,X('ROLL','রোল')),E('span',null,u.roll||'—'))));
     el.appendChild(E('div',{class:'gl'}));}
   else{el.appendChild(E('div',{class:'tp'},lg,E('div',{class:'in'},o.n)));
     el.appendChild(E('div',{class:'tx'},o.a?E('div',null,o.a):null,o.ph?E('div',null,X('Phone: ','ফোন: ')+o.ph):null,E('div',{style:'margin-top:.8mm'},X('Property of the institution. If found, please return to the address above.','প্রতিষ্ঠানের সম্পত্তি। কুড়িয়ে পেলে উপরের ঠিকানায় ফেরত দিন।'))));
@@ -2176,8 +2174,8 @@ function personCard(u){var l=[];
   else{l.push(u.roll?X('ID / Roll ','আইডি / রোল ')+u.roll:'');l.push(pv(u,'designation'));l.push(pv(u,'inst'));l.push(phLine(u));l.push(pv(u,'subjects')?X('Subjects: ','বিষয়: ')+pv(u,'subjects'):'');l.push(pv(u,'address'));}
   return E('div',{class:'pt-pc'},avatar(u,54),E('div',{class:'pt-pi'},E('b',null,nm(u)),(u.nameEn&&u.nameBn)?E('div',{class:'qm'},LANG==='en'?u.nameBn:u.nameEn):null,l.filter(Boolean).map(function(x){return E('div',{class:'qm'},x);})));}
 function profileForm(role,d,opt){opt=opt||{};var box=E('div',{class:'qt h1'}),ins={},photo=d.photo||'',HAS=/[ঀ-৿]/,
-  PR=role==='student'?[['name','Name','নাম',1],['nick','Nickname','ডাকনাম',0],['father',"Father's name",'পিতার নাম',0],['mother',"Mother's name",'মাতার নাম',0],['inst','Institution (school)','শিক্ষাপ্রতিষ্ঠান (স্কুল)',0],['address','Address','ঠিকানা',0]]:
-    [['name','Name','নাম',1],['nick','Nickname','ডাকনাম',0],['designation','Designation','পদবি',0],['subjects','Subjects you teach','যে বিষয়(গুলো) পড়ান',0],['inst','Institution','প্রতিষ্ঠান',0],['address','Address','ঠিকানা',0]];
+  PR=role==='student'?[['name','Name','নাম',1],['nick','Nickname','ডাকনাম',0],['father',"Father's name",'পিতার নাম',0],['mother',"Mother's name",'মাতার নাম',0],['inst','School name','স্কুলের নাম',0],['address','Address','ঠিকানা',0]]:
+    [['name','Name','নাম',1],['nick','Nickname','ডাকনাম',0],['designation','Designation','পদবি',0],['subjects','Subjects you teach','যে বিষয়(গুলো) পড়ান',0],['inst','School / workplace name','স্কুল / কর্মস্থলের নাম',0],['address','Address','ঠিকানা',0]];
   function pre(k,l){var v=d[k+(l==='bn'?'Bn':'En')];if(v!=null&&v!=='')return v;var g=d[k];if(!g||k==='name')return '';return (HAS.test(g)?l==='bn':l==='en')?g:'';}
   box.appendChild(E('div',{class:'qhint'},X('Fill every detail in both Bangla and English. The Bangla version is used for Bangla results and the English version for English results — the two are never mixed.','প্রতিটি তথ্য বাংলা ও ইংরেজি, দুই ভাষাতেই দিন। বাংলা ফলাফলে বাংলা এবং ইংরেজি ফলাফলে ইংরেজি তথ্য ব্যবহার হবে — দুই ভাষা কখনো মিশবে না।')));
   PR.forEach(function(f){var k=f[0],b=E('input',{class:'q-in',lang:'bn',value:pre(k,'bn'),autocomplete:'off'}),e=E('input',{class:'q-in',lang:'en',value:pre(k,'en'),autocomplete:'off'});ins[k]={bn:b,en:e};
@@ -2189,15 +2187,16 @@ function profileForm(role,d,opt){opt=opt||{};var box=E('div',{class:'qt h1'}),in
   box.appendChild(E('label',{class:'pt-lab'},X('Secondary number (optional)','দ্বিতীয় নম্বর (ঐচ্ছিক)')));box.appendChild(ph2);
   box.appendChild(E('label',{class:'pt-lab'},X('WhatsApp preferred on','হোয়াটসঅ্যাপ কোন নম্বরে')));box.appendChild(wa);
   var insSel=null,headSel=null;
-  if((S.insts||[]).length){var mk=function(v){var s=E('select',{class:'q-in'},E('option',{value:''},'— '+X('None','নেই')+' —'));S.insts.forEach(function(i){s.appendChild(E('option',{value:i.id},instName(i)));});s.value=v||'';return s;};
-    insSel=mk(d.instId);box.appendChild(E('label',{class:'pt-lab'},X('Institution (registered list)','প্রতিষ্ঠান (নিবন্ধিত তালিকা)')));box.appendChild(insSel);
-    if(opt.admin&&role==='teacher'){headSel=mk(d.headOf);box.appendChild(E('label',{class:'pt-lab'},X('Head of institution (admin only)','প্রতিষ্ঠান প্রধান (শুধু অ্যাডমিন)')));box.appendChild(headSel);}}
   var prev=E('div',{class:'pt-pc'}),fi=E('input',{type:'file',accept:'image/*',style:'display:none',onchange:function(){var fo=this.files&&this.files[0];this.value='';if(!fo)return;photoFrom(fo).then(function(u){photo=u;drawP();},function(){toast(X('Could not read the photo','ছবি পড়া যায়নি'));});}});
   function drawP(){prev.innerHTML='';prev.appendChild(avatar({photo:photo,nameBn:'?'},60));prev.appendChild(E('div',null,E('button',{class:'q-btn g',style:'margin:0 6px 0 0',type:'button',onclick:function(){fi.click();}},photo?X('Change photo','ছবি বদলান'):'+ '+X('Photo (optional)','ছবি (ঐচ্ছিক)')),photo?E('button',{class:'q-btn r',style:'margin:0',type:'button',onclick:function(){photo='';drawP();}},X('Remove','সরান')):null));}
   drawP();box.appendChild(E('label',{class:'pt-lab'},X('Photo','ছবি')));box.appendChild(prev);box.appendChild(fi);
   var rollIn=null,stSel=null;
   if(opt.admin){if(role==='student'){rollIn=E('input',{class:'q-in',value:d.roll||'',placeholder:X('Roll number','রোল নম্বর')});box.appendChild(E('label',{class:'pt-lab'},X('Roll (admin)','রোল (অ্যাডমিন)')));box.appendChild(rollIn);}
     stSel=E('select',{class:'q-in'},E('option',{value:'approved'},X('Approved','অনুমোদিত')),E('option',{value:'pending'},X('Pending','অপেক্ষমাণ')),E('option',{value:'rejected'},X('Cancelled','বাতিল')));stSel.value=d.status||'approved';box.appendChild(E('label',{class:'pt-lab'},X('Status','অবস্থা')));box.appendChild(stSel);}
+  if((S.insts||[]).length&&!opt.noInst){var mk=function(v,none){var sl=E('select',{class:'q-in'});if(none)sl.appendChild(E('option',{value:''},'— '+X('None','নেই')+' —'));S.insts.forEach(function(i){sl.appendChild(E('option',{value:i.id},instName(i)));});sl.value=v||'';return sl;};
+    insSel=mk(d.instId||defInstId(),!!opt.admin);box.appendChild(E('label',{class:'pt-lab'},X('Institution','ইনস্টিটিউশন')+(opt.admin?'':' *')));box.appendChild(insSel);
+    if(!opt.admin)box.appendChild(E('div',{class:'qhint'},X('Choose the institution you are registering in.','যে ইনস্টিটিউশনে নিবন্ধন করছেন সেটি নির্বাচন করুন।')));
+    if(opt.admin&&role==='teacher'){headSel=mk(d.headOf,true);box.appendChild(E('label',{class:'pt-lab'},X('Head of institution (admin only)','প্রতিষ্ঠান প্রধান (শুধু অ্যাডমিন)')));box.appendChild(headSel);}}
   var btn=E('button',{class:'q-btn big',style:'margin-top:14px',onclick:function(){var o={},i,f,k,b,e;
     for(i=0;i<PR.length;i++){f=PR[i];k=f[0];b=ins[k].bn.value.trim();e=ins[k].en.value.trim();var lab=X(f[1],f[2]);
       if(e&&HAS.test(e)){toast(X('"'+lab+'" (English) must be written in English letters','"'+lab+'" (English) ইংরেজি অক্ষরে লিখুন'));ins[k].en.focus();return;}
@@ -2207,7 +2206,7 @@ function profileForm(role,d,opt){opt=opt||{};var box=E('div',{class:'qt h1'}),in
       if((b&&!e)||(e&&!b)){toast(X('Please fill "'+lab+'" in both Bangla and English','"'+lab+'" বাংলা ও ইংরেজি দুটোতেই দিন'));(b?ins[k].en:ins[k].bn).focus();return;}
       o[k+'Bn']=b;o[k+'En']=e;if(k!=='name')o[k]=b||e;}
     if(role==='student'){o.cls=cls.value;if(!o.cls){toast(X('Select your class','শ্রেণি নির্বাচন করুন'));cls.focus();return;}}
-    o.phone=ph.value.trim();o.phone2=ph2.value.trim();o.wa=wa.value;if(!opt.admin&&!o.phone){toast(X('Enter your mobile number','মোবাইল নম্বর দিন'));ph.focus();return;}if(insSel)o.instId=insSel.value;if(headSel){o.headOf=headSel.value;if(o.headOf)o.instId=o.headOf;}o.photo=photo||'';if(opt.admin){if(rollIn)o.roll=rollIn.value.trim();o.status=stSel.value;}
+    o.phone=ph.value.trim();o.phone2=ph2.value.trim();o.wa=wa.value;if(!opt.admin&&!o.phone){toast(X('Enter your mobile number','মোবাইল নম্বর দিন'));ph.focus();return;}if(insSel&&!opt.admin&&!insSel.value){toast(X('Select your institution','ইনস্টিটিউশন নির্বাচন করুন'));insSel.focus();return;}if(insSel)o.instId=insSel.value;if(headSel){o.headOf=headSel.value;if(o.headOf)o.instId=o.headOf;}o.photo=photo||'';if(opt.admin){if(rollIn)o.roll=rollIn.value.trim();o.status=stSel.value;}
     btn.disabled=true;opt.onSave(o,function(){btn.disabled=false;});}},opt.label||X('Save','সংরক্ষণ'));
   box.appendChild(btn);return box;}
 function regScreen(role,editing){root.innerHTML='';var wrap=E('div',{class:'pt-in'}),f=S.f;root.appendChild(wrap);
@@ -2239,7 +2238,7 @@ function nav0(){var m=S.mode;
     {h:'\u0985\u09CD\u09AF\u09BE\u09A1\u09AE\u09BF\u09A8',items:[['approvals','\u2705','\u0985\u09A8\u09C1\u09AE\u09CB\u09A6\u09A8'],['students','\uD83C\uDF93','\u09B6\u09BF\u0995\u09CD\u09B7\u09BE\u09B0\u09CD\u09A5\u09C0'],['teachers','\uD83D\uDC69\u200D\uD83C\uDFEB','\u09B6\u09BF\u0995\u09CD\u09B7\u0995'],['settings','\u2699\uFE0F','\u09AE\u09BE\u09B0\u09CD\u0995\u09BF\u0982 \u09B8\u09C7\u099F\u09BF\u0982\u09B8']]},
     {h:'\u09B6\u09BF\u0995\u09CD\u09B7\u0995 \u09AD\u09BE\u09B0\u09CD\u09B8\u09A8',items:[['studio','\uD83E\uDDE9','Quiz Studio'],['exams','\uD83D\uDCDD','\u09AA\u09B0\u09C0\u0995\u09CD\u09B7\u09BE'],['marks','\u270D\uFE0F','\u09A8\u09AE\u09CD\u09AC\u09B0 \u098F\u09A8\u09CD\u099F\u09CD\u09B0\u09BF'],['results','\uD83C\uDFC6','\u09AB\u09B2\u09BE\u09AB\u09B2']]},
     {h:'\u09B6\u09BF\u0995\u09CD\u09B7\u09BE\u09B0\u09CD\u09A5\u09C0 \u09AD\u09BE\u09B0\u09CD\u09B8\u09A8',items:[['sview','\uD83D\uDC40','\u09B6\u09BF\u0995\u09CD\u09B7\u09BE\u09B0\u09CD\u09A5\u09C0\u09B0 \u09B9\u09CB\u09AE \u09A6\u09C7\u0996\u09C1\u09A8']]}];}
-var PARENT={feeledger:'fees',feeplan:'fees',sprofile:'students',pedit:'students',examedit:'exams',resview:'results',preview:'exams',compose:'notices',queries:'notices',edits:'exams',sview:'students'};
+var PARENT={feeledger:'fees',feeplan:'fees',sprofile:'students',pedit:'students',pself:'profile',examedit:'exams',resview:'results',preview:'exams',compose:'notices',queries:'notices',edits:'exams',sview:'students'};
 function drawSide(){var side=S.side;if(!side)return;side.innerHTML='';var act=PARENT[S.view]||S.view;
   if(S.view==='pedit'&&S.params.u&&S.params.u.role==='teacher')act='teachers';
   side.appendChild(E('div',{class:'pt-brand'},E('img',{src:brandLogo(),alt:'',style:'object-fit:contain'}),E('div',null,E('b',null,brandName()),E('div',{class:'qm'},S.admin?'\u09AE\u09BE\u09B8\u09CD\u099F\u09BE\u09B0 \u0985\u09CD\u09AF\u09BE\u09A1\u09AE\u09BF\u09A8':S.mode==='teacher'?'\u09B6\u09BF\u0995\u09CD\u09B7\u0995':'\u09B6\u09BF\u0995\u09CD\u09B7\u09BE\u09B0\u09CD\u09A5\u09C0'))));
@@ -2253,13 +2252,13 @@ function goBack(){var o=document.querySelector('.iqx-ov,#pt-idc,#pt-rcpt');if(o)
   if(S.hist&&S.hist.length){var x=S.hist.pop();go(x.v,x.p,true);return;}
   ask(X('Exit the app?','অ্যাপ থেকে বের হবেন?'),X('Exit','বের হন'),exitApp,X('Stay','থাকুন'));}
 window.addEventListener('popstate',function(){if(S.exiting||!S.u||!S.main)return;try{history.pushState({iq:1},'');}catch(e){}goBack();});
-function countPend(){var f=S.f;f.fs.getDocs(f.fs.query(f.fs.collection(f.db,'users'),f.fs.where('status','==','pending'))).then(function(s){S.pend=s.size;drawSide();},function(){});}
+function countPend(){var f=S.f,n=0;f.fs.getDocs(f.fs.query(f.fs.collection(f.db,'users'),f.fs.where('status','==','pending'))).then(function(s){n=s.size;S.pend=n;drawSide();},function(){}).then(function(){return f.fs.getDocs(f.fs.query(f.fs.collection(f.db,'editReqs'),f.fs.where('status','==','pending')));}).then(function(s2){S.pend=n+s2.size;drawSide();},function(){});}
 function openShell(){clean();root.innerHTML='';
   var side=E('aside',{class:'pt-side'}),back=E('div',{class:'pt-back'}),main=E('div',{class:'pt-in'});
   function close(){side.classList.remove('open');back.classList.remove('on');}back.onclick=close;
   var top=E('div',{class:'pt-top'},E('button',{class:'pt-menu',onclick:function(){side.classList.add('open');back.classList.add('on');}},'\u2630'),(S.bk=E('button',{class:'pt-bk','aria-label':'Back',style:'display:none',onclick:goBack},'\u2039')),E('b',null,brandName()),(S.bell=E('button',{class:'pt-bell',onclick:function(){go('notices');}},ic('notices'),S.bellN=E('span',{class:'pt-bdg',style:'display:none'},''))));
   S.main=main;S.side=side;S.closeSide=close;root.appendChild(back);root.appendChild(side);root.appendChild(E('div',{class:'pt-body'},top,main));
-  if(S.va)root.insertBefore(vaBar(),root.firstChild);S.hist=[];S.view='';if(!S.guard){S.guard=1;try{history.pushState({iq:1},'');}catch(e){}}go(S.head?'hdash':{student:'home',teacher:'exams',admin:'approvals'}[S.mode]);if(S.admin)countPend();demoCleanup();if(!S.va&&!NAGS){NAGS=1;setTimeout(nagNext,2500);}subNotices();nbadge();}
+  if(S.va)root.insertBefore(vaBar(),root.firstChild);S.hist=[];S.view='';if(!S.guard){S.guard=1;try{history.pushState({iq:1},'');}catch(e){}}go(S.head?'hdash':{student:'home',teacher:'exams',admin:'approvals'}[S.mode]);if(S.admin)countPend();demoCleanup();backfillInst();if(!S.va&&!NAGS){NAGS=1;setTimeout(nagNext,2500);}subNotices();nbadge();}
 
 /* ---------- data helpers ---------- */
 function usersBy(role){var f=S.f;return f.fs.getDocs(f.fs.query(f.fs.collection(f.db,'users'),f.fs.where('role','==',role))).then(function(s){var a=[];s.forEach(function(d){a.push(Object.assign({uid:d.id},d.data()));});return a;});}
@@ -2286,7 +2285,7 @@ V.preview=function(m,p){head(m,'\u09AB\u09B2\u09BE\u09AB\u09B2 \u09AA\u09CD\u09B
   getMarks(p.ex.id).then(function(rows){m.lastChild.remove();if(!rows.length){m.appendChild(empty('\u0995\u09CB\u09A8\u09CB \u09A8\u09AE\u09CD\u09AC\u09B0 \u098F\u09A8\u09CD\u099F\u09CD\u09B0\u09BF \u09A8\u09C7\u0987\u0964'));return;}renderResult(m,compute(p.ex,rows),{csv:true,staff:true});}).catch(fail);};
 
 /* ---------- student home ---------- */
-function studentHome(u,m){m.appendChild(E('h2',{style:'margin:4px 2px 10px;font:700 22px var(--fd)'},X('Hello, ','হ্যালো, ')+callName(u)+' \uD83D\uDC4B'));m.appendChild(E('div',{class:'qt h1'},personCard(u)));var box=E('div');m.appendChild(box);box.appendChild(loadMsg());
+function studentHome(u,m){rsCss();m.appendChild(E('div',{class:'hm-hero'},E('div',{class:'hm-l'},E('small',null,X('Hello,','হ্যালো,')),E('b',null,callName(u)+' \uD83D\uDC4B'),E('span',null,[nm(u),u.cls?X('Class ','শ্রেণি ')+u.cls:''].filter(Boolean).join(' · '))),E('div',{class:'hm-roll'},E('small',null,X('ROLL','রোল')),E('b',null,u.roll||'—'))));m.appendChild(E('div',{class:'qt h1'},personCard(u)));var box=E('div');m.appendChild(box);box.appendChild(loadMsg());
   loadResults().then(function(rs){box.innerHTML='';var mine=[];
     rs.forEach(function(r){var row=(r.rows||[]).filter(function(x){return x.uid===u.uid;})[0];if(row)mine.push({r:r,row:row});});
     if(!mine.length){box.appendChild(E('div',{class:'qhint'},'\u098F\u0996\u09A8\u09CB \u0995\u09CB\u09A8\u09CB \u09AB\u09B2\u09BE\u09AB\u09B2 \u09AA\u09CD\u09B0\u0995\u09BE\u09B6\u09BF\u09A4 \u09B9\u09AF\u09BC\u09A8\u09BF\u0964 \u09AA\u09CD\u09B0\u0995\u09BE\u09B6 \u09B9\u09B2\u09C7 \u098F\u0996\u09BE\u09A8\u09C7 \u09AA\u09BE\u09B0\u09AB\u09B0\u09AE\u09CD\u09AF\u09BE\u09A8\u09CD\u09B8 \u09B0\u09BF\u09AA\u09CB\u09B0\u09CD\u099F \u09A8\u09BF\u099C\u09C7 \u09A5\u09C7\u0995\u09C7\u0987 \u09AF\u09CB\u0997 \u09B9\u09AC\u09C7\u0964'));return;}
@@ -2303,7 +2302,18 @@ function studentHome(u,m){m.appendChild(E('h2',{style:'margin:4px 2px 10px;font:
   }).catch(fail);}
 V.home=function(m){head(m,'\u0986\u09AE\u09BE\u09B0 \u09B9\u09CB\u09AE','\u0986\u09AA\u09A8\u09BE\u09B0 \u09AA\u09BE\u09B0\u09AB\u09B0\u09AE\u09CD\u09AF\u09BE\u09A8\u09CD\u09B8 \u09B0\u09BF\u09AA\u09CB\u09B0\u09CD\u099F');studentHome(S.prof,m);};
 V.sprofile=function(m,p){head(m,'\u09B6\u09BF\u0995\u09CD\u09B7\u09BE\u09B0\u09CD\u09A5\u09C0\u09B0 \u09B9\u09CB\u09AE',null,function(){go(p.from||'sview');});studentHome(p.u,m);};
-V.profile=function(m){head(m,'\u0986\u09AE\u09BE\u09B0 \u09AA\u09CD\u09B0\u09CB\u09AB\u09BE\u0987\u09B2');m.appendChild(E('div',{class:'qt h1'},personCard(S.prof),E('div',{class:'qm'},S.u.email),E('button',{class:'q-btn',onclick:function(){idCards([Object.assign({},S.prof,{uid:S.u.uid})]);}},X('My ID card','আমার আইডি কার্ড')),E('div',{class:'qhint'},'\u09A4\u09A5\u09CD\u09AF \u09AC\u09A6\u09B2\u09BE\u09A4\u09C7 \u0985\u09CD\u09AF\u09BE\u09A1\u09AE\u09BF\u09A8\u0995\u09C7 \u099C\u09BE\u09A8\u09BE\u09A8\u0964')));};
+V.profile=function(m){head(m,'\u0986\u09AE\u09BE\u09B0 \u09AA\u09CD\u09B0\u09CB\u09AB\u09BE\u0987\u09B2');var f=S.f,eb=E('div',{class:'rs-edit'});rsCss();
+  m.appendChild(E('div',{class:'qt h1'},personCard(S.prof),E('div',{class:'qm'},S.u.email),E('button',{class:'q-btn',onclick:function(){idCards([Object.assign({},S.prof,{uid:S.u.uid})]);}},X('My ID card','আমার আইডি কার্ড')),eb));
+  eb.appendChild(loadMsg());
+  f.fs.getDoc(f.fs.doc(f.db,'editReqs',S.u.uid)).then(function(d){eb.innerHTML='';var q=d.exists()?d.data():null,st=q&&q.status;
+    function reqBtn(txt){return E('button',{class:'q-btn g',onclick:function(){askText({icon:'✎',title:X('Request to edit my information','তথ্য সম্পাদনার অনুরোধ'),sub:X('The admin will review it. The edit form opens only after approval.','অ্যাডমিন দেখে অনুমোদন দিলে তবেই সম্পাদনার ফর্ম খুলবে।'),ph:X('What do you want to change? (optional)','কী বদলাতে চান? (ঐচ্ছিক)'),btn:X('Send request','অনুরোধ পাঠান'),max:300,chips:[X('Spelling of my name','নামের বানান'),X('Mobile number','মোবাইল নম্বর'),X('Photo','ছবি'),X('Class or school','শ্রেণি বা স্কুল')]},function(n){var P=S.prof||{};f.fs.setDoc(f.fs.doc(f.db,'editReqs',S.u.uid),{uid:S.u.uid,role:P.role||S.mode,name:nm(P),roll:P.roll||'',cls:P.cls||'',instId:P.instId||'',email:S.u.email||'',note:n,status:'pending',at:Date.now()}).then(function(){toast(X('Request sent to the admin','অ্যাডমিনের কাছে অনুরোধ গেছে'));go('profile');},function(e){toast(errMsg(e));});});}},'✎ '+txt);}
+    if(st==='pending'){eb.appendChild(E('div',{class:'rs-note wait'},'⏳ '+X('Edit request sent — waiting for the admin’s approval.','সম্পাদনার অনুরোধ পাঠানো হয়েছে — অ্যাডমিনের অনুমোদনের অপেক্ষায়।')));eb.appendChild(E('button',{class:'q-btn r',onclick:function(){f.fs.deleteDoc(f.fs.doc(f.db,'editReqs',S.u.uid)).then(function(){go('profile');},function(e){toast(errMsg(e));});}},X('Withdraw request','অনুরোধ ফিরিয়ে নিন')));}
+    else if(st==='approved'){eb.appendChild(E('div',{class:'rs-note ok'},'✓ '+X('Approved by the admin. You can edit your information once.','অ্যাডমিন অনুমোদন দিয়েছেন। আপনি একবার তথ্য সম্পাদনা করতে পারবেন।')));eb.appendChild(E('button',{class:'q-btn',onclick:function(){go('pself');}},'✎ '+X('Edit my information','আমার তথ্য সম্পাদনা')));}
+    else{if(st==='rejected')eb.appendChild(E('div',{class:'rs-note no'},'✕ '+X('Your last request was not approved.','আপনার আগের অনুরোধ অনুমোদিত হয়নি।')+(q.reason?' '+q.reason:'')));eb.appendChild(reqBtn(X('Request to edit my information','তথ্য সম্পাদনার অনুরোধ করুন')));eb.appendChild(E('div',{class:'qhint'},X('Information can be changed only with the admin’s approval.','অ্যাডমিনের অনুমোদন ছাড়া তথ্য বদলানো যায় না।')));}
+  },function(){eb.innerHTML='';eb.appendChild(E('div',{class:'qhint'},'তথ্য বদলাতে অ্যাডমিনকে জানান।'));});};
+V.pself=function(m){head(m,X('Edit my information','আমার তথ্য সম্পাদনা'),X('Approved by the admin — this works once','অ্যাডমিন অনুমোদিত — একবারই করা যাবে'),function(){go('profile');});var f=S.f,u=S.prof||{};m.appendChild(loadMsg());
+  f.fs.getDoc(f.fs.doc(f.db,'editReqs',S.u.uid)).then(function(d){m.lastChild.remove();if(!d.exists()||d.data().status!=='approved'){m.appendChild(empty(X('No approved edit request. Send a request from your profile.','অনুমোদিত অনুরোধ নেই। প্রোফাইল থেকে অনুরোধ পাঠান।')));return;}
+    m.appendChild(profileForm(u.role||S.mode,u,{noInst:true,label:X('Save changes','পরিবর্তন সংরক্ষণ'),onSave:function(o,done){o.updatedAt=Date.now();f.fs.updateDoc(f.fs.doc(f.db,'users',S.u.uid),o).then(function(){S.prof=Object.assign({},S.prof,o);return f.fs.updateDoc(f.fs.doc(f.db,'editReqs',S.u.uid),{status:'used',usedAt:Date.now()}).catch(function(){});}).then(function(){toast(X('Information updated','তথ্য হালনাগাদ হয়েছে'));go('profile');},function(e){done();toast(errMsg(e));});}}));},fail);};
 V.join=function(m){head(m,'\u0995\u09C1\u0987\u099C\u09C7 \u09AF\u09CB\u0997 \u09A6\u09BF\u09A8','\u09B6\u09BF\u0995\u09CD\u09B7\u0995\u09C7\u09B0 \u09B2\u09BF\u0982\u0995 \u09AC\u09BE \u0995\u09CB\u09A1 \u09AA\u09C7\u09B8\u09CD\u099F \u0995\u09B0\u09C1\u09A8');var inp=E('input',{class:'q-in',placeholder:'https://\u2026?k=abcd1234  \u0985\u09A5\u09AC\u09BE  abcd1234'});
   m.appendChild(E('div',{class:'qt h2'},inp,E('button',{class:'q-btn big',onclick:function(){var v=inp.value.trim(),k=(/[?&]k=([a-z0-9]{6,20})/i.exec(v)||[])[1]||(/^[a-z0-9]{6,20}$/i.test(v)?v:'');if(!k){toast('\u09B8\u09A0\u09BF\u0995 \u09B2\u09BF\u0982\u0995 \u09AC\u09BE \u0995\u09CB\u09A1 \u09A6\u09BF\u09A8');return;}location.href=location.pathname+'?k='+k;}},'\u09B6\u09C1\u09B0\u09C1 \u0995\u09B0\u09C1\u09A8')));};
 
@@ -2315,7 +2325,14 @@ V.approvals=function(m){head(m,'\u0985\u09A8\u09C1\u09AE\u09CB\u09A6\u09A8\u09C7
     a.forEach(function(u,i){var roll=E('input',{class:'q-in',value:u.roll||'',placeholder:'\u09B0\u09CB\u09B2 \u09A8\u09AE\u09CD\u09AC\u09B0 (\u0990\u099A\u09CD\u099B\u09BF\u0995)',style:'margin:6px 0'});
       box.appendChild(E('div',{class:'qt h'+(i%4)},E('span',{class:'qpill '+(u.role==='teacher'?'':'on')},u.role==='teacher'?'\u09B6\u09BF\u0995\u09CD\u09B7\u0995':'\u09B6\u09BF\u0995\u09CD\u09B7\u09BE\u09B0\u09CD\u09A5\u09C0'),personCard(u),E('div',{class:'qm'},u.email),roll,
         E('div',{class:'qgrid qg2'},E('button',{class:'q-btn',onclick:function(){var o={status:'approved',approvedAt:Date.now(),approvedBy:S.u.email,reason:''};var rv=roll.value.trim()||u.roll||'';(rv?Promise.resolve(rv):nextRoll()).then(function(r){o.roll=r;upd(u.uid,o,'\u0985\u09A8\u09C1\u09AE\u09CB\u09A6\u09A8 \u09A6\u09C7\u0993\u09AF\u09BC\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7',function(){go('approvals');});},function(e){toast(errMsg(e));});}},'\u2713 \u0985\u09A8\u09C1\u09AE\u09CB\u09A6\u09A8'),
-          E('button',{class:'q-btn r',onclick:function(){var r=prompt('\u0995\u09BE\u09B0\u09A3 (\u0990\u099A\u09CD\u099B\u09BF\u0995)');if(r===null)return;upd(u.uid,{status:'rejected',reason:r.trim()},'\u09AC\u09BE\u09A4\u09BF\u09B2 \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7',function(){go('approvals');});}},'\u2715 \u09AC\u09BE\u09A4\u09BF\u09B2'))));});}).catch(fail);};
+          E('button',{class:'q-btn r',onclick:function(){askText({icon:'✕',title:X('Cancel this application','আবেদন বাতিল'),sub:nm(u),ph:X('Reason (optional)','কারণ (ঐচ্ছিক)'),btn:X('Cancel application','বাতিল করুন'),max:200},function(r){upd(u.uid,{status:'rejected',reason:r.trim()},'\u09AC\u09BE\u09A4\u09BF\u09B2 \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7',function(){go('approvals');});});}},'\u2715 \u09AC\u09BE\u09A4\u09BF\u09B2'))));});}).catch(fail);};
+var _vApp=V.approvals;V.approvals=function(m){_vApp(m);var b2=E('div'),f=S.f;rsCss();m.appendChild(b2);b2.appendChild(E('div',{class:'qsec'},'✎ '+X('Edit requests','সম্পাদনার অনুরোধ')));b2.appendChild(loadMsg());
+  f.fs.getDocs(f.fs.query(f.fs.collection(f.db,'editReqs'),f.fs.where('status','==','pending'))).then(function(s){var a=[];s.forEach(function(d){a.push(Object.assign({id:d.id},d.data()));});a.sort(function(x,y){return (x.at||0)-(y.at||0);});b2.lastChild.remove();
+    if(!a.length)b2.appendChild(empty(X('No edit requests.','কোনো সম্পাদনার অনুরোধ নেই।')));
+    a.forEach(function(q,i){function set(o,msg){f.fs.updateDoc(f.fs.doc(f.db,'editReqs',q.id),o).then(function(){toast(msg);countPend();go('approvals');},function(e){toast(errMsg(e));});}
+      b2.appendChild(E('div',{class:'qt h'+(i%4)},E('span',{class:'qpill '+(q.role==='teacher'?'':'on')},q.role==='teacher'?X('Teacher','শিক্ষক'):X('Student','শিক্ষার্থী')),E('div',{class:'pt-pi',style:'margin-top:6px'},E('b',null,q.name||'—'),E('div',{class:'qm'},[q.roll?X('Roll ','রোল ')+q.roll:'',q.cls?X('Class ','শ্রেণি ')+q.cls:'',fmtT(q.at)].filter(Boolean).join(' · ')),q.note?E('div',{style:'margin-top:6px;white-space:pre-wrap'},q.note):E('div',{class:'qm'},X('No note','কোনো নোট নেই'))),
+        E('div',{class:'qgrid qg2'},E('button',{class:'q-btn',onclick:function(){set({status:'approved',by:S.u.email||'',decidedAt:Date.now()},X('Approved — the person can now edit once','অনুমোদিত — এখন একবার সম্পাদনা করতে পারবে'));}},'✓ '+X('Approve','অনুমোদন')),
+          E('button',{class:'q-btn r',onclick:function(){askText({icon:'✕',title:X('Decline this request','অনুরোধ বাতিল'),sub:q.name,ph:X('Reason (optional)','কারণ (ঐচ্ছিক)'),btn:X('Decline','বাতিল করুন'),max:200},function(r){set({status:'rejected',reason:r,decidedAt:Date.now()},X('Declined','বাতিল করা হয়েছে'));});}},'✕ '+X('Decline','বাতিল')))));});},function(e){b2.lastChild.remove();b2.appendChild(empty(errMsg(e)));});};
 function people(m,role,o){head(m,o.title,o.sub);var f=S.f,box=E('div'),list=E('div'),st='all',cl='',q='',data=[],cur=[];m.appendChild(box);box.appendChild(loadMsg());
   (function(){var tb=E('div',{class:'qrow'});if(o.inst&&(S.head||S.fi)&&role==='student')tb.appendChild(E('button',{class:'q-btn',style:'margin:0',onclick:function(){addStudent(S.head||S.fi,function(){go(S.view);});}},'+ '+X('Add student','শিক্ষার্থী যোগ করুন')));tb.appendChild(E('button',{class:'q-btn g',style:'margin:0',onclick:function(){idCards(cur.filter(function(u){return u.status==='approved';}));}},X('Print ID cards','আইডি কার্ড ছাপুন')));m.insertBefore(tb,box);})();
   (o.inst&&S.head&&!S.admin?usersIn(role,S.head):usersBy(role)).then(function(a){if(o.inst&&(S.head||S.fi)){var id0=S.head||S.fi;a=a.filter(function(u){return u.instId===id0;});}data=sortPeople(a);box.innerHTML='';
@@ -2405,7 +2422,7 @@ function entry(area,ex,sub,studs,mk){area.innerHTML='';
   area.appendChild(E('div',{class:'qdock'},E('button',{class:'q-btn',onclick:saveAll},ex.published?'সংশোধন সংরক্ষণ':'সংরক্ষণ')));
   function drawAu(r){if(!r.au)return;var a=((S.au||{})[r.u.uid]||{}).subs;a=a&&a[sub.id];if(!a&&r.leg&&r.leg.by)a={by:r.leg.by,at:r.leg.at};r.au.innerHTML='';if(!a){r.au.textContent='\uD83D\uDD12 '+X('Admin only: not marked yet','শুধু অ্যাডমিন: এখনো নম্বর দেওয়া হয়নি');return;}
     r.au.textContent='\uD83D\uDD12 '+X('Admin only','শুধু অ্যাডমিন')+' \u00B7 '+X('Marked by ','মার্কিং করেছেন ')+(a.byName||a.by)+' ('+a.by+')'+(a.cAt?' \u00B7 '+X('first entered ','প্রথম এন্ট্রি ')+fmtT(a.cAt):'')+(a.at?' \u00B7 '+X('last edited ','সর্বশেষ সম্পাদনা ')+fmtT(a.at):'');}
-  function saveAll(){var bad=false,ws=[],chg=[];
+  function saveAll(why0){var bad=false,ws=[],chg=[];
     rows.forEach(function(r){if(!r.dirty)return;var pp={},any=false;sub.parts.forEach(function(pt){var v=r.inputs[pt.id].value.trim();if(v!==''){var x=parseFloat(v);if(isNaN(x)||x<0||x>pt.max){bad=true;return;}pp[pt.id]=x;any=true;}});
       var ab=r.ab.checked,rem=r.rem.value.trim(),old=mk[r.u.uid]||{},os=(old.s||{})[sub.id]||{},op=os.p||{};
       var same=!!os.ab===ab&&sub.parts.every(function(pt){return (op[pt.id]==null?'':String(op[pt.id]))===(pp[pt.id]==null?'':String(pp[pt.id]));}),remSame=(old.rem||'')===rem;
@@ -2413,7 +2430,7 @@ function entry(area,ex,sub,studs,mk){area.innerHTML='';
       ws.push({r:r,pp:pp,ab:ab,rem:rem,has:!!mk[r.u.uid]});
       if(!same)chg.push({uid:r.u.uid,name:nm(r.u),before:op,beforeAb:!!os.ab,after:pp,ab:ab});});
     if(bad){toast('কিছু নম্বর পূর্ণমানের বেশি বা ভুল (লাল ঘর)');return;}if(!ws.length){toast('কোনো পরিবর্তন নেই');return;}
-    var why='';if(ex.published&&chg.length){why=(prompt('নম্বর সংশোধনের কারণ লিখুন (বাধ্যতামূলক):')||'').trim();if(!why){toast('কারণ ছাড়া সংশোধন হবে না');return;}}
+    var why=typeof why0==='string'?why0.trim():'';if(ex.published&&chg.length&&!why){askText({icon:'✎',title:X('Reason for correcting marks','নম্বর সংশোধনের কারণ'),sub:sub.name+' · '+chg.length+X(' student(s)',' জনের নম্বর'),ph:X('Why are these marks being changed?','কেন নম্বর বদলানো হচ্ছে?'),btn:X('Save correction','সংশোধন সংরক্ষণ'),req:true,max:300,chips:[X('Totalling mistake','যোগ করতে ভুল হয়েছিল'),X('Wrong entry','নম্বর এন্ট্রিতে ভুল'),X('Answer script rechecked','খাতা পুনঃনিরীক্ষণ করা হয়েছে')]},function(v){saveAll(v);});return;}
     var b=f.fs.writeBatch(f.db),now=Date.now();
     ws.forEach(function(w){var ref=f.fs.doc(f.db,'exams',ex.id,'marks',w.r.u.uid),val={p:w.pp,ab:w.ab};
       if(w.has){var up={};up['s.'+sub.id]=val;up.rem=w.rem;b.update(ref,up);}else{var so={};so[sub.id]=val;b.set(ref,{uid:w.r.u.uid,name:w.r.u.nameEn||'',nameBn:w.r.u.nameBn||'',cls:w.r.u.cls||'',roll:w.r.u.roll||'',rem:w.rem,s:so});}});
@@ -2470,47 +2487,81 @@ V.notices=function(m){head(m,'নোটিশ ও বার্তা','প্র
     f.fs.getDocs(f.fs.query(f.fs.collection(f.db,'queries'),f.fs.where('uid','==',S.u.uid))).then(function(s){qbox.lastChild.remove();var a=[];s.forEach(function(d){a.push(Object.assign({id:d.id},d.data()));});a.sort(function(x,y){return y.at-x.at;});
       if(!a.length)qbox.appendChild(E('div',{class:'qhint'},'ফলাফল পাতা থেকে "প্রশ্ন করুন" চেপে শিক্ষককে প্রশ্ন বা পুনঃনিরীক্ষণের অনুরোধ পাঠাতে পারবেন।'));
       a.forEach(function(q,i){qbox.appendChild(E('div',{class:'qt h'+(i%4)},E('b',null,q.title),E('div',{style:'white-space:pre-wrap'},q.text),E('div',{class:'qm'},fmtT(q.at)),q.reply?E('div',{class:'qt h1',style:'margin-top:8px'},E('b',null,'উত্তর'+(q.repName?' ('+q.repName+')':'')),E('div',{style:'white-space:pre-wrap'},q.reply)):E('span',{class:'qpill off'},'উত্তরের অপেক্ষায়')));});},function(){qbox.lastChild.remove();});}};
-function salOf(u,l,mode){var n=callName(u),bn=l==='bn';if(mode==='n')return '';if(mode==='g')return bn?'সম্মানিত অভিভাবক,':'Dear Guardian,';if(mode==='gs')return bn?'সম্মানিত '+n+'-এর অভিভাবক,':'Dear Guardian of '+n+',';return bn?'প্রিয় '+n+',':'Dear '+n+',';}
+function rsCss(){if(document.getElementById('rs-css'))return;var c=document.createElement('style');c.id='rs-css';c.textContent=
+'.rs-card{background:linear-gradient(165deg,#fff,#f4f7ff);border:1.5px solid #e2e8f8;border-radius:20px;padding:14px;margin:12px 0;box-shadow:0 14px 32px -24px #1a2f6b99}'
++'.rs-h{display:flex;align-items:center;gap:10px;margin-bottom:8px}.rs-h>span{font-size:22px}.rs-h b{font:700 15px var(--f);display:block}.rs-h small{font:400 12px/1.3 var(--f);color:#6b7390;display:block}'
++'.rs-pr{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #e8ecf8;flex-wrap:wrap}.rs-pi{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#eef3ff,#dfe8ff);display:grid;place-items:center;font-size:19px;flex:none}'
++'.rs-pt{flex:1;min-width:120px}.rs-pt b{display:block;font:700 14px var(--f)}.rs-pt small{font:400 11.5px var(--f);color:#6b7390}.rs-pb{display:flex;gap:6px;flex:none}.rs-pb .q-btn{margin:0;padding:8px 12px;font-size:12.5px}'
++'.rs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:6px;margin-top:8px}.rs-bx{border-radius:12px;padding:6px 7px;background:#fff;border:1.5px solid #e2e8f8;text-align:center;min-width:0}'
++'.rs-bx small{display:block;font:600 10.5px/1.25 var(--f);color:#5d6685;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rs-bx b{display:block;font:700 13.5px var(--fd);margin-top:1px}'
++'.rs-bx.hi{background:linear-gradient(160deg,#dcf8e8,#a9e8c5);border-color:#16a765}.rs-bx.hi small,.rs-bx.hi b{color:#0a5a3a}.rs-bx.bad{background:linear-gradient(160deg,#ffe4e8,#ffb7c2);border-color:#e0405a}.rs-bx.bad small,.rs-bx.bad b{color:#8a1230}.rs-bx.tot:not(.hi):not(.bad){background:#f1f4ff}'
++'.rs-res{display:inline-block;margin-top:3px;padding:2px 9px;border-radius:99px;font:700 10.5px var(--f);letter-spacing:.5px}.rs-res.ok{background:#d6f5e4;color:#0a6a43}.rs-res.no{background:#ffd9df;color:#a01a36}'
++'.rs-leg>b{display:block;margin-bottom:6px;font:700 14px var(--f)}.rs-leg>div{display:flex;align-items:center;gap:8px;font:500 12.5px/1.4 var(--f);margin:4px 0}.rs-sw{width:16px;height:16px;border-radius:5px;border:1.5px solid;flex:none}.rs-sw.hi{background:#a9e8c5;border-color:#16a765}.rs-sw.bad{background:#ffb7c2;border-color:#e0405a}.rs-sw.fin{background:#fff;border-color:#9aa4c4}'
++'.rs-edit{margin-top:8px}.rs-note{border-radius:14px;padding:10px 12px;font:500 13px/1.4 var(--f);margin:8px 0}.rs-note.wait{background:#fff6dc;color:#7a5a00}.rs-note.ok{background:#dcf8e8;color:#0a5a3a}.rs-note.no{background:#ffe4e8;color:#8a1230}'
++'.hm-hero{display:flex;align-items:center;justify-content:space-between;gap:12px;border-radius:24px;padding:16px 16px 16px 18px;margin:4px 0 12px;color:#fff;position:relative;overflow:hidden;background:radial-gradient(90% 120% at 100% 0%,#3f6fd8 0%,transparent 60%),linear-gradient(135deg,#0b1633 0%,#1a2f6b 60%,#27489b 100%);box-shadow:0 22px 40px -22px #0b1633,inset 0 0 0 1.5px #e7c46a66}'
++'.hm-hero:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,#ffffff09 0 2px,transparent 2px 22px);pointer-events:none}'
++'.hm-l{min-width:0;position:relative}.hm-l small{display:block;font:500 13px var(--f);opacity:.8}.hm-l b{display:block;font:700 24px/1.2 var(--fd);word-break:break-word}.hm-l span{display:block;font:500 12px var(--f);opacity:.75;margin-top:3px}'
++'.hm-roll{position:relative;flex:none;text-align:center;min-width:86px;padding:8px 14px 10px;border-radius:20px;background:linear-gradient(160deg,#f7e0a0,#d6a436);color:#3a2800;box-shadow:0 10px 22px -10px #000,inset 0 1px 0 #fff8}'
++'.hm-roll small{display:block;font:700 10px var(--f);letter-spacing:2px;opacity:.75}.hm-roll b{display:block;font:800 30px/1.05 ui-monospace,Menlo,Consolas,monospace;letter-spacing:1px}'
++'.ask-ov{position:fixed;inset:0;z-index:2147483600;background:rgba(8,16,40,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;padding:12px}'
++'.ask-box{width:100%;max-width:460px;background:linear-gradient(170deg,#fff,#f3f7ff);border-radius:26px;box-shadow:0 30px 70px -20px #000a;overflow:hidden;animation:askUp .22s ease-out}'
++'.ask-top{padding:16px 18px;background:radial-gradient(120% 140% at 100% 0,#27489b66,transparent 55%),linear-gradient(135deg,#0b1633,#1a2f6b);color:#fff;display:flex;gap:12px;align-items:center}'
++'.ask-ic{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#f7e0a0,#d6a436);display:grid;place-items:center;font-size:21px;flex:none;color:#3a2800;box-shadow:0 8px 18px -8px #000}.ask-top b{display:block;font:700 16.5px/1.25 var(--fd)}.ask-top small{display:block;opacity:.8;font:500 12px/1.3 var(--f);margin-top:2px}'
++'.ask-bd{padding:14px 16px 4px}.ask-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}.ask-chips button{border:1.5px solid #dbe3f7;background:#fff;border-radius:99px;padding:6px 11px;font:600 12px var(--f);cursor:pointer;color:#1a2f6b}'
++'.ask-ta{width:100%;min-height:96px;resize:vertical;border:1.5px solid #dbe3f7;border-radius:16px;padding:12px;font:500 14.5px/1.45 var(--f);box-sizing:border-box;outline:none;background:#fff;color:#14213d}.ask-ta:focus{border-color:#27489b;box-shadow:0 0 0 4px #27489b22}.ask-ta.bad{border-color:#e0405a;box-shadow:0 0 0 4px #e0405a22}'
++'.ask-ct{text-align:right;font:500 11px var(--f);color:#8b93ad;margin:4px 2px 0}.ask-ft{display:flex;gap:10px;padding:10px 16px 16px}.ask-ft .q-btn{flex:1;margin:0}@keyframes askUp{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}';document.head.appendChild(c);}
+function ncCss(){if(document.getElementById('nc-css'))return;var c=document.createElement('style');c.id='nc-css';c.textContent=
+'.nc-card{background:linear-gradient(165deg,#fff 0%,#f4f7ff 100%);border:1.5px solid #e2e8f8;border-radius:22px;padding:16px 16px 12px;margin:12px 0;box-shadow:0 16px 36px -24px #1a2f6b88,inset 0 1px 0 #fff}'
++'.nc-h{display:flex;align-items:center;gap:11px;font:700 15.5px var(--f);margin:0 0 8px;color:#0b1633}.nc-s{font:400 12px/1.35 var(--f);color:#6b7390;margin-top:1px}'
++'.nc-n{flex:none;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#0b855f,#0a5a42);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 0 0 3px #e7c46a77,0 6px 12px -6px #0a5a42}'
++'.nc-chips{display:flex;gap:7px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:none}.nc-chips::-webkit-scrollbar{display:none}.nc-chips .q-btn{flex:none;border-radius:99px;white-space:nowrap}'
++'.nc-card .q-in{border-radius:14px}';document.head.appendChild(c);}
+function salOf(u,l,mode){var n=callName(u),bn=l==='bn',T=u&&u.role==='teacher';if(mode==='n')return '';if(mode==='g')return bn?'সম্মানিত অভিভাবক,':'Dear Guardian,';if(mode==='gg')return bn?'সম্মানিত অভিভাবক,':'Dear Guardians,';if(mode==='gs')return bn?'সম্মানিত '+n+'-এর অভিভাবক,':'Dear Guardian of '+n+',';if(mode==='st')return bn?'প্রিয় শিক্ষার্থীবৃন্দ,':'Dear Students,';if(mode==='t')return bn?'সম্মানিত শিক্ষকমণ্ডলী,':'Dear Teachers,';if(mode==='a')return bn?'সম্মানিত সুধী,':'Dear All,';if(T)return bn?'সম্মানিত '+n+',':'Dear '+n+',';return bn?'প্রিয় '+n+',':'Dear '+n+',';}
 function smsNum(u){var d=String(u.phone||u.phone2||'').replace(/\D/g,'');if(d.charAt(0)==='0')d='88'+d;return d;}
 function copyTxt(t){try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).catch(function(){});return;}}catch(e){}try{var a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;left:-999px;top:0';document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();}catch(e){}}
 function sigOf(id,l){return inLang(l||LANG,function(){var i=(S.insts||[]).filter(function(x){return x.id===id;})[0];return (i?instName(i):'')||orgName();});}
 function sigMine(l){return sigOf((S.head||(S.prof&&S.prof.instId))||'',l);}
 function sigEl(n){return n&&n.sig?E('div',{style:'text-align:right;margin-top:6px;font-weight:600'},document.createTextNode('— '+n.sig)):null;}
-function salSel(o,fn){var sel=E('select',{class:'q-in',onchange:function(){o.sal=this.value;fn();}},E('option',{value:'s'},X('Student — by nickname','শিক্ষার্থী — ডাকনাম ধরে')),E('option',{value:'gs'},X('Guardian of the student (with nickname)','অভিভাবক — শিক্ষার্থীর ডাকনামসহ')),E('option',{value:'g'},X('Guardian — “Dear Guardian”','অভিভাবক — “সম্মানিত অভিভাবক”')),E('option',{value:'n'},X('No salutation','সম্বোধন ছাড়া')));sel.value=o.sal||'s';return E('div',null,E('label',{class:'pt-lab'},X('Address as','সম্বোধন')),sel);}
+function salSel(o,fn){var sel=E('select',{class:'q-in',onchange:function(){o.sal=this.value;o.man=true;fn();}},E('option',{value:'st'},X('Students — “Dear Students”','শিক্ষার্থীবৃন্দ — “প্রিয় শিক্ষার্থীবৃন্দ”')),E('option',{value:'gg'},X('Guardians — “Dear Guardians”','অভিভাবক — “সম্মানিত অভিভাবক”')),E('option',{value:'t'},X('Teachers — “Dear Teachers”','শিক্ষকমণ্ডলী — “সম্মানিত শিক্ষকমণ্ডলী”')),E('option',{value:'a'},X('Everyone — “Dear All”','সবাই — “সম্মানিত সুধী”')),E('option',{value:'s'},X('Each person by nickname','প্রত্যেককে ডাকনাম ধরে')),E('option',{value:'gs'},X('Guardian of the student (with nickname)','অভিভাবক — শিক্ষার্থীর ডাকনামসহ')),E('option',{value:'n'},X('No salutation','সম্বোধন ছাড়া')));sel.value=o.sal||'st';return E('div',null,E('label',{class:'pt-lab'},X('Address as','সম্বোধন')),sel);}
 var GUARD={examdate:1,fee:1,meeting:1,holiday:1,classtest:1};
 var NTPL=[
- {k:'examdate',i:'\uD83D\uDCC5',l:['Exam date','পরীক্ষার তারিখ'],t:['{exam} starts on {date}','{exam} শুরু হচ্ছে {date}'],b:['{exam} begins on {date} at {time}. Please arrive on time. Best wishes!','{exam} শুরু হবে {date}, সময় {time}। সময়মতো উপস্থিত থাকবে। শুভকামনা!']},
- {k:'examprep',i:'\uD83D\uDCDD',l:['Exam preparation','পরীক্ষার প্রস্তুতি'],t:['Get ready for {exam}','{exam}-এর প্রস্তুতি নাও'],b:['{exam} starts on {date}. Revise well, sleep early and bring your admit card and pens.','{exam} শুরু {date}। ভালো করে পড়ো, আগে ঘুমাও, প্রবেশপত্র ও কলম সাথে আনবে।']},
- {k:'examtoday',i:'\u23F0',l:['Exam today','আজ পরীক্ষা'],t:['{exam} is today','আজ {exam}'],b:['Today is {exam}, at {time}. Please be on time.','আজ {exam}, সময় {time}। সবাই সময়মতো আসবে।']},
- {k:'resultsoon',i:'\uD83C\uDFC6',l:['Result coming soon','ফলাফল শিগগিরই'],t:['{exam} result coming soon','{exam}-এর ফলাফল শিগগিরই'],b:['The result of {exam} is being prepared and will be published soon.','{exam}-এর ফলাফল তৈরি হচ্ছে, শিগগিরই প্রকাশ হবে।']},
- {k:'classtest',i:'\u270D\uFE0F',l:['Class test','ক্লাস টেস্ট'],t:['Class test on {date}','{date} ক্লাস টেস্ট'],b:['There is a class test on {date}. Topic: {extra}.','{date} ক্লাস টেস্ট আছে। বিষয়: {extra}।']},
- {k:'fee',i:'\uD83D\uDCB3',l:['Fee reminder','ফি রিমাইন্ডার'],t:['Fee reminder','ফি রিমাইন্ডার'],b:['Please pay this month\'s fee by {date}. Thank you.','এই মাসের ফি {date}-এর মধ্যে পরিশোধ করার অনুরোধ রইল। ধন্যবাদ।']},
- {k:'meeting',i:'\uD83D\uDC6A',l:['Parents meeting','অভিভাবক সভা'],t:['Parents meeting on {date}','অভিভাবক সভা {date}'],b:['A parents meeting is on {date} at {time}. Please bring your guardian.','{date}, {time}-এ অভিভাবক সভা। অভিভাবককে নিয়ে আসবে।']},
+ {k:'examdate',i:'\uD83D\uDCC5',l:['Exam date','পরীক্ষার তারিখ'],t:['{exam} begins on {date}','{exam} শুরু {date}'],b:['{exam} begins on {date} at {time}. You are {req} to arrive on time. Best wishes!','{exam} শুরু হবে {date}, সময় {time}। সময়মতো উপস্থিত হওয়ার জন্য {req}। শুভকামনা!']},
+ {k:'examprep',i:'\uD83D\uDCDD',l:['Exam preparation','পরীক্ষার প্রস্তুতি'],t:['Preparing for {exam}','{exam}-এর প্রস্তুতি'],b:['{exam} starts on {date}. You are {req} to revise well, rest early and bring the admit card and pens.','{exam} শুরু {date}। ভালোভাবে পড়াশোনা করা, আগে ঘুমানো এবং প্রবেশপত্র ও কলম সাথে আনার জন্য {req}।']},
+ {k:'examtoday',i:'\u23F0',l:['Exam today','আজ পরীক্ষা'],t:['{exam} is today','আজ {exam}'],b:['Today is {exam}, at {time}. You are {req} to be on time.','আজ {exam}, সময় {time}। সময়মতো উপস্থিত হওয়ার জন্য {req}।']},
+ {k:'resultsoon',i:'\uD83C\uDFC6',l:['Result coming soon','ফলাফল শিগগিরই'],t:['{exam} result coming soon','{exam}-এর ফলাফল শিগগিরই'],b:['The result of {exam} is being prepared and will be published soon.','{exam}-এর ফলাফল তৈরি হচ্ছে, শিগগিরই প্রকাশ করা হবে।']},
+ {k:'classtest',i:'\u270D\uFE0F',l:['Class test','ক্লাস টেস্ট'],t:['Class test on {date}','{date} ক্লাস টেস্ট'],b:['A class test will be held on {date}. Topic: {extra}. You are {req} to prepare well.','{date} ক্লাস টেস্ট অনুষ্ঠিত হবে। বিষয়: {extra}। ভালোভাবে প্রস্তুতি নেওয়ার জন্য {req}।']},
+ {k:'fee',i:'\uD83D\uDCB3',l:['Fee reminder','ফি রিমাইন্ডার'],t:['Monthly fee reminder','মাসিক ফি রিমাইন্ডার'],b:['You are {req} to pay the monthly dues {due}. Thank you.','মাসিক বকেয়া {due} পরিশোধ করার জন্য {req}। ধন্যবাদ।']},
+ {k:'meeting',i:'\uD83D\uDC6A',l:['Parents meeting','অভিভাবক সভা'],t:['Parents meeting on {date}','অভিভাবক সভা {date}'],b:['A parents meeting will be held on {date} at {time}. You are {req} to attend.','{date}, {time}-এ অভিভাবক সভা অনুষ্ঠিত হবে। উপস্থিত থাকার জন্য {req}।']},
  {k:'holiday',i:'\uD83C\uDFD6\uFE0F',l:['Holiday','ছুটির নোটিশ'],t:['Holiday notice','ছুটির নোটিশ'],b:['The institution will be closed on {date}. {extra}','{date} তারিখে প্রতিষ্ঠান বন্ধ থাকবে। {extra}']},
- {k:'well',i:'\uD83C\uDF89',l:['Well done','অভিনন্দন'],t:['Congratulations!','অভিনন্দন!'],b:['Congratulations on {extra}! Keep it up.','{extra}-এর জন্য অভিনন্দন! এভাবেই এগিয়ে যাও।']},
- {k:'greet',i:'\uD83C\uDF19',l:['Greetings','শুভেচ্ছা'],t:['Warm greetings','শুভেচ্ছা'],b:['Warm greetings on {extra}.','{extra} উপলক্ষে তোমাকে শুভেচ্ছা।']}];
+ {k:'well',i:'\uD83C\uDF89',l:['Well done','অভিনন্দন'],t:['Congratulations!','অভিনন্দন!'],b:['Congratulations on {extra}! Keep it up.','{extra}-এর জন্য অভিনন্দন! এভাবেই এগিয়ে চলুন।']},
+ {k:'greet',i:'\uD83C\uDF19',l:['Greetings','শুভেচ্ছা'],t:['Warm greetings','শুভেচ্ছা'],b:['Warm greetings on {extra}.','{extra} উপলক্ষে আন্তরিক শুভেচ্ছা।']}];
 V.compose=function(m){head(m,X('Send a notice','নোটিশ / বার্তা পাঠান'),S.admin?X('To anyone, a class or everyone','যে কাউকে, যেকোনো শ্রেণিকে বা সবাইকে'):X('To your students','আপনার শিক্ষার্থীদের জন্য'));
-  var f=S.f,lg=LANG,tpl=null,rec=null,pvU=null,ul=null,o={pop:false,os:true,pin:false,board:false,sal:'s'},opts=[];
+  var f=S.f,lg=LANG,tpl=null,rec=null,pvU=null,ul=null,o={pop:false,os:true,pin:false,board:false,sal:'st',man:false},opts=[];
   if(S.admin){opts.push(['all',X('Everyone (students & teachers)','সবাই (শিক্ষার্থী ও শিক্ষক)')]);opts.push(['teacher',X('All teachers','সব শিক্ষক')]);}opts.push(['student',X('All students','সব শিক্ষার্থী')]);S.st.classes.forEach(function(c){opts.push(['cls:'+c,X('Class ','শ্রেণি ')+c+X(' only',' এর সবাই')]);});opts.push(['user',X('One person (private)','নির্দিষ্ট একজনকে (ব্যক্তিগত)')]);
   var au=E('select',{class:'q-in'}),usr=E('select',{class:'q-in',style:'display:none'}),pvS=E('select',{class:'q-in',onchange:function(){pvU=(rec||[])[+this.value]||null;draw();}}),
-    lgS=E('select',{class:'q-in',onchange:function(){lg=this.value;if(tpl)applyT(tpl);draw();}},E('option',{value:'bn'},'বাংলা'),E('option',{value:'en'},'English')),
+    lgS=E('select',{class:'q-in',onchange:function(){lg=this.value;var tt=NTPL.filter(function(x){return x.k===tpl;})[0];if(tt)applyT(tt);else draw();}},E('option',{value:'bn'},'বাংলা'),E('option',{value:'en'},'English')),
     ti=E('input',{class:'q-in',placeholder:X('Title','শিরোনাম'),oninput:function(){draw();}}),bo=E('textarea',{class:'q-in',rows:4,placeholder:X('Message… (you can use {date} {time} {exam} {extra} {name})','বার্তা লিখুন… ({date} {time} {exam} {extra} {name} ব্যবহার করা যাবে)'),oninput:function(){draw();}}),
     dv=E('input',{class:'q-in',type:'date',oninput:function(){draw();}}),tv=E('input',{class:'q-in',type:'time',oninput:function(){draw();}}),exm=E('input',{class:'q-in',placeholder:X('Exam name','পরীক্ষার নাম'),oninput:function(){draw();}}),xt=E('input',{class:'q-in',placeholder:X('Topic / occasion','বিষয় / উপলক্ষ'),oninput:function(){draw();}}),
     lv=E('select',{class:'q-in',onchange:function(){draw();}},E('option',{value:'info'},X('Normal','সাধারণ')),E('option',{value:'important'},X('Important','গুরুত্বপূর্ণ')),E('option',{value:'urgent'},X('Urgent (pop-up)','জরুরি (পপআপ)'))),
     ex=E('select',{class:'q-in'},E('option',{value:'0'},X('Permanent','স্থায়ী')),E('option',{value:'1'},X('1 day','১ দিন')),E('option',{value:'3'},X('3 days','৩ দিন')),E('option',{value:'7'},X('7 days','৭ দিন')),E('option',{value:'30'},X('30 days','৩০ দিন'))),
-    chips=E('div',{class:'qrow',style:'gap:6px'}),pv=E('div'),sent=E('div'),hist=E('div');
-  lgS.value=lg;var salW=salSel(o,function(){draw();});opts.forEach(function(x){au.appendChild(E('option',{value:x[0]},x[1]));});
+    chips=E('div',{class:'nc-chips'}),pv=E('div'),sent=E('div'),hist=E('div');
+  lgS.value=lg;opts.forEach(function(x){au.appendChild(E('option',{value:x[0]},x[1]));});ncCss();o.sal=defSal();var salW=salSel(o,function(){draw();});
+  function defSal(){var a=au.value,g=tpl&&GUARD[tpl];if(a==='teacher')return 't';if(a==='all')return 'a';if(a==='user')return g?'gg':'s';return g?'gg':'st';}
+  function syncSal(){var sq=salW&&salW.querySelector('select');if(sq)sq.value=o.sal;}
+  function reqOf(u){var sl=o.sal,ask;if(sl==='gg'||sl==='g'||sl==='gs'||sl==='t'||sl==='a')ask=false;else if(sl==='st')ask=true;else ask=!((u&&u.role==='teacher')||(!u&&au.value==='teacher'));return lg==='bn'?(ask?'বলা হলো':'অনুরোধ করা হলো'):(ask?'asked':'requested');}
+  function dueTxt(){if(!dv.value)return lg==='bn'?'যত দ্রুত সম্ভব':'as soon as possible';try{var d=new Date(dv.value+'T00:00:00').toLocaleDateString(lg==='bn'?'bn-BD':'en-GB',{day:'numeric',month:'long',year:'numeric'});return lg==='bn'?d+' তারিখের মধ্যে':'by '+d;}catch(e){return dv.value;}}
+  function setDue(){var d=new Date();dv.value=d.getDate()<=10?d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-10':'';}
   function fd(){if(!dv.value)return '['+(lg==='bn'?'তারিখ':'date')+']';try{return new Date(dv.value+'T00:00:00').toLocaleDateString(lg==='bn'?'bn-BD':'en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}catch(e){return dv.value;}}
   function ft(){if(!tv.value)return '['+(lg==='bn'?'সময়':'time')+']';try{var p=tv.value.split(':');return new Date(2000,0,1,+p[0],+p[1]).toLocaleTimeString(lg==='bn'?'bn-BD':'en-US',{hour:'numeric',minute:'2-digit'});}catch(e){return tv.value;}}
-  function fill(x){return x.replace(/\{date\}/g,fd()).replace(/\{time\}/g,ft()).replace(/\{exam\}/g,exm.value.trim()||'['+(lg==='bn'?'পরীক্ষা':'exam')+']').replace(/\{extra\}/g,xt.value.trim()||'…');}
-  function build(u){var n=callName(u),b=fill(bo.value),hasN=/\{name\}/.test(bo.value);b=b.replace(/\{name\}/g,n);if(o.sal!=='n'&&!hasN)b=salOf(u,lg,o.sal)+'\n'+b;return{t:fill(ti.value).replace(/\{name\}/g,n),b:b,sig:sigOf(u.instId||S.head||(S.prof&&S.prof.instId)||'',lg)};}
-  function applyT(t){var k=lg==='bn'?1:0;tpl=t.k;o.sal=GUARD[t.k]?'g':'s';var sq=salW.querySelector('select');if(sq)sq.value=o.sal;ti.value=t.t[k];bo.value=t.b[k];drawChips();draw();}
+  function fill(x,u){return x.replace(/\{req\}/g,reqOf(u)).replace(/\{due\}/g,dueTxt()).replace(/\{date\}/g,fd()).replace(/\{time\}/g,ft()).replace(/\{exam\}/g,exm.value.trim()||'['+(lg==='bn'?'পরীক্ষা':'exam')+']').replace(/\{extra\}/g,xt.value.trim()||'…');}
+  function build(u){var n=callName(u),b=fill(bo.value,u),hasN=/\{name\}/.test(bo.value);b=b.replace(/\{name\}/g,n);if(o.sal!=='n'&&!hasN)b=salOf(u,lg,o.sal)+'\n'+b;return{t:fill(ti.value,u).replace(/\{name\}/g,n),b:b,sig:sigOf(u.instId||S.head||(S.prof&&S.prof.instId)||'',lg)};}
+  function applyT(t){var k=lg==='bn'?1:0;tpl=t.k;o.man=false;o.sal=defSal();syncSal();if(t.k==='fee')setDue();ti.value=t.t[k];bo.value=t.b[k];drawChips();draw();}
   function drawChips(){chips.innerHTML='';NTPL.forEach(function(t){chips.appendChild(E('button',{class:'q-btn'+(tpl===t.k?'':' g'),style:'margin:0;padding:6px 11px;font-size:12.5px',onclick:function(){applyT(t);}},t.i+' '+t.l[LANG==='bn'?1:0]));});}
   function recLoad(){rec=null;pvU=null;draw();var a=au.value;if(a==='user'){if(!ul){ul=[];usr.innerHTML='';usr.appendChild(E('option',{value:''},X('Loading…','লোড হচ্ছে…')));Promise.all([usersBy('student'),S.admin?usersBy('teacher'):Promise.resolve([])]).then(function(r){ul=sortPeople(r[0].concat(r[1]).filter(function(u){return u.status==='approved';}));usr.innerHTML='';usr.appendChild(E('option',{value:''},'— '+X('Select','নির্বাচন করুন')+' —'));ul.forEach(function(u,i){usr.appendChild(E('option',{value:i},nm(u)+(u.role==='teacher'?' ('+X('teacher','শিক্ষক')+')':(u.cls?' · '+X('Class ','শ্রেণি ')+u.cls:'')+(u.roll?' · '+X('Roll ','রোল ')+u.roll:''))));});},function(){toast(X('Could not load the list','তালিকা আনা যায়নি'));});}
       var u=ul&&ul[+usr.value];rec=u?[u]:[];pvU=u||null;draw();return;}
     var need=a==='teacher'?['teacher']:a==='all'?['student','teacher']:['student'];
     Promise.all(need.map(usersBy)).then(function(r){var l=[];r.forEach(function(x){l=l.concat(x);});l=l.filter(function(u){return u.status==='approved'&&(a.slice(0,4)!=='cls:'||u.cls===a.slice(4))&&(!S.head||S.admin||u.instId===S.head);});rec=sortPeople(l);pvS.innerHTML='';rec.slice(0,60).forEach(function(u,i){pvS.appendChild(E('option',{value:i},callName(u)+' — '+nm(u)));});pvU=rec[0]||null;draw();},function(){rec=[];draw();});}
-  au.onchange=function(){usr.style.display=au.value==='user'?'':'none';recLoad();};usr.onchange=recLoad;
+  au.onchange=function(){usr.style.display=au.value==='user'?'':'none';if(!o.man){o.sal=defSal();syncSal();}recLoad();};usr.onchange=recLoad;
   function draw(){pv.innerHTML='';var u=pvU||{nick:lg==='bn'?'রহিম':'Rahim',nameEn:'Rahim',nameBn:'রহিম'},nf=build(u),pop=o.pop||lv.value==='urgent';
     pv.appendChild(E('div',{class:'qsec'},X('Live preview','লাইভ প্রিভিউ')));
     if(rec&&rec.length>1)pv.appendChild(E('div',{class:'qrow',style:'flex-wrap:nowrap'},E('span',{class:'qm',style:'flex:none'},X('Preview as','প্রিভিউ:')),pvS));
@@ -2527,11 +2578,12 @@ V.compose=function(m){head(m,X('Send a notice','নোটিশ / বার্�
     var one=function(u){var nf=build(u);return f.fs.setDoc(f.fs.doc(f.db,'users',u.uid,'inbox',rid(12)),{type:'notice',title:nf.t,body:nf.b,lang:lg,sig:nf.sig,lvl:lvl,pop:pop,os:o.os,pin:o.pin,at:now,exp:exp,by:S.u.email,byName:by,read:false}).then(function(){ok++;},function(){bad++;});};
     var chain=Promise.resolve(),i;for(i=0;i<rec.length;i+=15)(function(part){chain=chain.then(function(){return Promise.all(part.map(one));});})(rec.slice(i,i+15));
     chain.then(function(){if(o.board&&au.value!=='user')return addNotice({title:fill(ti.value).replace(/\{name\}/g,lg==='bn'?'শিক্ষার্থী':'student'),body:fill(bo.value).replace(/\{name\}/g,lg==='bn'?'শিক্ষার্থী':'student'),aud:au.value,sig:sigMine(lg),lvl:lvl,pin:o.pin,exp:exp}).catch(function(){});}).then(function(){btn.disabled=false;toast(X('Sent to ','পাঠানো হয়েছে: ')+ok+(bad?' · '+X('failed ','ব্যর্থ ')+bad:''));if(ok){logSent(t,ok);ti.value='';bo.value='';tpl=null;drawChips();draw();}});}},X('Send','পাঠান'));
-  m.appendChild(E('div',{class:'qt h0'},E('b',null,X('Ready-made messages','তৈরি করা বার্তা')),E('div',{class:'qm',style:'margin:2px 0 8px'},X('Tap one to fill it in, then edit if you like. Result-published notices are sent automatically when you publish a result.','একটি ট্যাপ করলে লেখা বসে যাবে, চাইলে বদলান। ফলাফল প্রকাশ করলে ফলাফলের নোটিশ নিজে থেকেই যায়।')),chips));
-  m.appendChild(E('div',{class:'qt h1'},E('label',{class:'pt-lab'},X('Send to','কাদের পাঠাবেন')),au,usr,E('label',{class:'pt-lab'},X('Message language','বার্তার ভাষা')),lgS,E('label',{class:'pt-lab'},X('Title','শিরোনাম')),ti,E('label',{class:'pt-lab'},X('Message','বার্তা')),bo,
-    E('label',{class:'pt-lab'},X('Fill in the details','তথ্য দিন')),E('div',{class:'qgrid qg2'},exm,xt,dv,tv),
-    E('label',{class:'pt-lab'},X('Importance','গুরুত্ব')),lv,E('label',{class:'pt-lab'},X('How long to show','কতদিন দেখাবে')),ex,
-    salW,
+  function sec(n,t,sub){return E('div',{class:'nc-h'},E('span',{class:'nc-n'},n),E('div',null,E('div',null,t),sub?E('div',{class:'nc-s'},sub):null));}
+  m.appendChild(E('div',{class:'nc-card'},sec('✦',X('Ready-made messages','তৈরি করা বার্তা'),X('Tap one to fill it in, then edit if you like. Result notices go out automatically when you publish a result.','একটি ট্যাপ করলে লেখা বসে যাবে, চাইলে বদলান। ফলাফল প্রকাশ করলে ফলাফলের নোটিশ নিজে থেকেই যায়।')),chips));
+  m.appendChild(E('div',{class:'nc-card'},sec('1',X('Audience & language','প্রাপক ও ভাষা')),E('label',{class:'pt-lab'},X('Send to','কাদের পাঠাবেন')),au,usr,salW,E('label',{class:'pt-lab'},X('Message language','বার্তার ভাষা')),lgS));
+  m.appendChild(E('div',{class:'nc-card'},sec('2',X('Message','বার্তা'),X('Salutation and wording follow the audience automatically.','সম্বোধন ও ভাষা প্রাপক অনুযায়ী নিজে থেকেই বদলায়।')),E('label',{class:'pt-lab'},X('Title','শিরোনাম')),ti,E('label',{class:'pt-lab'},X('Message','বার্তা')),bo,
+    E('label',{class:'pt-lab'},X('Fill in the details','তথ্য দিন')),E('div',{class:'qgrid qg2'},exm,xt,dv,tv)));
+  m.appendChild(E('div',{class:'nc-card'},sec('3',X('Delivery','পাঠানোর ধরন')),E('label',{class:'pt-lab'},X('Importance','গুরুত্ব')),lv,E('label',{class:'pt-lab'},X('How long to show','কতদিন দেখাবে')),ex,
     toggle(X('Pop-up on opening the app','অ্যাপ খুললে পপ-আপ'),null,false,function(v){o.pop=v;draw();}),toggle(X('Browser alert','ব্রাউজার অ্যালার্ট'),null,true,function(v){o.os=v;draw();}),
     toggle(X('Pin at the top','উপরে পিন'),null,false,function(v){o.pin=v;draw();}),toggle(X('Also post on the notice board','নোটিশ বোর্ডেও দিন'),X('Shown to everyone in the group, without a name','গ্রুপের সবাইকে নাম ছাড়া দেখাবে'),false,function(v){o.board=v;draw();})));
   var chW=E('div');
@@ -2554,7 +2606,15 @@ V.compose=function(m){head(m,X('Send a notice','নোটিশ / বার্�
   function dr(){sent.innerHTML='';var a=(S.nl||[]).filter(function(n){return S.admin||n.by===S.u.email;});if(!a.length)sent.appendChild(empty(X('Nothing on the board yet.','এখনো কিছু পাঠানো হয়নি।')));a.forEach(function(n,i){sent.appendChild(nCard(n,i,Infinity));});}S.refN=dr;dr();
   drawChips();drawHist();recLoad();};
 
-function askQuery(r,x){var t=prompt('আপনার প্রশ্ন বা পুনঃনিরীক্ষণের অনুরোধ লিখুন ('+r.title+'):');if(!t||!t.trim())return;var f=S.f;
+function askText(o,cb){var ov=E('div',{class:'ask-ov'}),ta=E('textarea',{class:'ask-ta',placeholder:o.ph||'',maxlength:o.max||500,oninput:function(){ct.textContent=ta.value.length+' / '+(o.max||500);ta.classList.remove('bad');}}),ct=E('div',{class:'ask-ct'},'0 / '+(o.max||500));if(o.val)ta.value=o.val;
+  function close(){document.removeEventListener('keydown',esc);ov.remove();}function esc(e){if(e.key==='Escape')close();}document.addEventListener('keydown',esc);
+  var chips=E('div',{class:'ask-chips'});(o.chips||[]).forEach(function(t){chips.appendChild(E('button',{type:'button',onclick:function(){ta.value=(ta.value.trim()?ta.value.trim().replace(/[.।]$/,'')+'. ':'')+t;ta.dispatchEvent(new Event('input'));ta.focus();}},t));});
+  var ok=E('button',{class:'q-btn',onclick:function(){var v=ta.value.trim();if(o.req&&!v){ta.classList.add('bad');ta.focus();toast(X('Please write a reason','অনুগ্রহ করে লিখুন'));return;}close();cb(v);}},o.btn||X('Confirm','নিশ্চিত করুন'));
+  ov.appendChild(E('div',{class:'ask-box'},E('div',{class:'ask-top'},E('div',{class:'ask-ic'},o.icon||'✎'),E('div',null,E('b',null,o.title||''),o.sub?E('small',null,o.sub):null)),E('div',{class:'ask-bd'},o.chips&&o.chips.length?chips:null,ta,ct),E('div',{class:'ask-ft'},E('button',{class:'q-btn g',onclick:close},X('Cancel','বাতিল')),ok)));
+  ov.addEventListener('click',function(e){if(e.target===ov)close();});document.body.appendChild(ov);setTimeout(function(){ta.focus();},60);}
+function askQuery(r,x){if(S.mode!=='student'||!x||x.uid!==S.u.uid){toast(X('You can ask only about your own result','আপনি শুধু নিজের ফলাফল নিয়ে প্রশ্ন করতে পারবেন'));return;}
+  askText({icon:'💬',title:X('Ask about your result','আপনার ফলাফল নিয়ে প্রশ্ন'),sub:r.title,ph:X('Write your question or review request…','আপনার প্রশ্ন বা পুনঃনিরীক্ষণের অনুরোধ লিখুন…'),btn:X('Send to teacher','শিক্ষককে পাঠান'),req:true,max:1000,chips:[X('Please recheck my marks','আমার নম্বর আবার দেখুন'),X('Total looks wrong','মোট নম্বরে ভুল মনে হচ্ছে'),X('A subject is missing','একটি বিষয় বাদ গেছে')]},function(t){_askQ(r,x,t);});}
+function _askQ(r,x,t){var f=S.f;
   f.fs.setDoc(f.fs.doc(f.db,'queries',rid(14)),{examId:r.id||'',title:r.title||'',uid:S.u.uid,name:x.nameBn||x.name||'',roll:x.roll||'',cls:x.cls||'',text:t.trim().slice(0,1000),at:Date.now(),status:'open'}).then(function(){toast('শিক্ষকের কাছে পাঠানো হয়েছে');},function(){toast('পাঠানো যায়নি');});}
 V.queries=function(m){head(m,'শিক্ষার্থীদের প্রশ্ন','ফলাফল নিয়ে প্রশ্ন ও পুনঃনিরীক্ষণের অনুরোধ');var f=S.f,box=E('div');m.appendChild(box);box.appendChild(loadMsg());
   f.fs.getDocs(f.fs.collection(f.db,'queries')).then(function(s){box.innerHTML='';var a=[];s.forEach(function(d){a.push(Object.assign({id:d.id},d.data()));});a.sort(function(x,y){return (x.status==='open'?0:1)-(y.status==='open'?0:1)||y.at-x.at;});
@@ -2586,7 +2646,7 @@ function syncResult(ex,uids){var f=S.f;return Promise.all([getMarks(ex.id),f.fs.
 /* ---- result analytics ---- */
 /* ===== v8: bilingual result output (Bangla OR English, never both), result types, GPA control, highest marks, preview-before-print ===== */
 function X(en,bn){return LANG==='bn'?bn:en;}
-var RT={merit:['মেধাতালিকা','Merit List'],basic:['ফলাফলপত্র','Result Sheet'],sheet:['একাডেমিক মার্কশিট','Academic Marksheet'],rank:['ক্রম','Rank'],name:['নাম','Name'],roll:['রোল','Roll'],total:['মোট','Total'],res:['ফল','Result'],pass:['পাস','Pass'],fail:['ফেল','Fail'],abs:['অনু.','Abs.'],cls:['শ্রেণি','Class'],full:['পূর্ণমান','Full marks'],sub:['বিষয়','Subject'],got:['প্রাপ্ত নম্বর','Marks obtained'],percent:['শতাংশ','Percent'],grade:['গ্রেড','Grade'],hi:['শ্রেণিতে সর্বোচ্চ','Class highest'],hiS:['সর্বোচ্চ','Highest'],passed:['উত্তীর্ণ','Passed'],failed:['অনুত্তীর্ণ','Failed'],absent:['অনুপস্থিত','Absent'],pos:['মেধাক্রম','Merit position'],of:['মোট %n জনের মধ্যে','out of %n students'],rem:['শিক্ষকের মন্তব্য','Teacher\'s remark'],ct:['শ্রেণিশিক্ষক','Class teacher'],hd:['অনুমোদিত ব্যক্তি','Authorized person'],note:['বন্ধনীর সংখ্যা হলো ওই বিষয়ে শ্রেণির সর্বোচ্চ নম্বর।','Figures in brackets are the highest marks in the class for that subject.'],rev:['সংশোধিত','Revised'],avg:['শ্রেণির গড়','Class average'],cnt:['জন','students'],date:['তারিখ','Date'],stu:['শিক্ষার্থী','Student'],outof:['মোট','of']};
+var RT={merit:['মেধাতালিকা','Merit List'],basic:['ফলাফলপত্র','Result Sheet'],sheet:['একাডেমিক মার্কশিট','Academic Marksheet'],rank:['ক্রম','Rank'],name:['নাম','Name'],roll:['রোল','Roll'],total:['মোট','Total'],res:['ফল','Result'],pass:['পাস','PASSED'],fail:['ফেল','FAILED'],abs:['অনু.','Abs.'],cls:['শ্রেণি','Class'],full:['পূর্ণমান','Full marks'],sub:['বিষয়','Subject'],got:['প্রাপ্ত নম্বর','Marks obtained'],percent:['শতাংশ','Percent'],grade:['গ্রেড','Grade'],hi:['শ্রেণিতে সর্বোচ্চ','Class highest'],hiS:['সর্বোচ্চ','Highest'],passed:['উত্তীর্ণ','PASSED'],failed:['অনুত্তীর্ণ','FAILED'],absent:['অনুপস্থিত','Absent'],pos:['মেধাক্রম','Merit position'],of:['মোট %n জনের মধ্যে','out of %n students'],rem:['শিক্ষকের মন্তব্য','Teacher\'s remark'],ct:['শ্রেণিশিক্ষক','Class teacher'],hd:['অনুমোদিত ব্যক্তি','Authorized person'],note:['সর্বশেষ সারিতে প্রতিটি বিষয়ে শ্রেণির সর্বোচ্চ নম্বর দেওয়া আছে।','The last row shows the highest mark in the class for each subject.'],rev:['সংশোধিত','Revised'],avg:['শ্রেণির গড়','Class average'],cnt:['জন','students'],date:['তারিখ','Date'],stu:['শিক্ষার্থী','Student'],outof:['মোট','of']};
 var SUBJ=[['বাংলা','Bangla'],['ইংরেজি','English'],['গণিত','Mathematics'],['গণিত','Maths'],['বিজ্ঞান','Science'],['সমাজ','Social'],['ধর্ম','Religion'],['ইসলাম','Islam'],['আইসিটি','ICT'],['সাধারণ জ্ঞান','General Knowledge']];
 function sn(n,l){var k=bnz(String(n||'').trim()),i;for(i=0;i<SUBJ.length;i++){if(l==='en'&&bnz(SUBJ[i][0])===k)return SUBJ[i][1];if(l==='bn'&&SUBJ[i][1].toLowerCase()===k.toLowerCase())return SUBJ[i][0];}return n;}
 function rtt(r,l){return (l==='bn'?(r.titleBn||r.title):(r.titleEn||r.title))||'';}
@@ -2618,13 +2678,14 @@ function fileOf(s){return String(s||'result').replace(/[^\wঀ-৿]+/g,'_');}
 function listBuild(r,o){return function(P){var l=o.lang,F=P.PFONT(),B=function(v){return pdig(P,l,v);},subs=r.subjects,mer=o.type==='merit',land=subs.length>3,tt=rt(mer?'merit':'basic',l),
   d=new P.Doc({paper:'A4',land:land,m:34,plain:true,bnf:true,enp:l==='en',foot:rtt(r,l)+' · '+tt});d.title=rtt(r,l)+' - '+tt;
   pHead(d,F,tt+' — '+rtt(r,l),[r.date||'',r.cls?rt('cls',l)+' '+B(r.cls):'',rt('full',l)+' '+B(r.max)].filter(Boolean).join('  ·  '),l);
-  var mw=d.W-2*d.m,sw=Math.max(34,Math.min(84,Math.floor((mw-(mer?34:0)-44-72-40-(o.gpa?38:0)-40-96)/Math.max(1,subs.length)))),hd=[],cw=[],ni=0;
+  var mw=d.W-2*d.m,sw=Math.max(34,Math.min(84,Math.floor((mw-(mer?34:0)-44-72-40-(o.gpa?38:0)-58-96)/Math.max(1,subs.length)))),hd=[],cw=[],ni=0;
   if(mer){hd.push(rt('rank',l));cw.push(34);}ni=hd.length;hd.push(rt('name',l),rt('roll',l));cw.push(0,44);
-  subs.forEach(function(s){hd.push(sn(s.name,l));cw.push(sw);});hd.push(rt('total',l),'%');cw.push(72,40);if(o.gpa){hd.push('GPA');cw.push(38);}hd.push(rt('res',l));cw.push(40);cw[ni]=mw-sum(cw);
-  var hv=function(v){return o.hi&&v!=null?' ('+B(v)+')':'';};
+  subs.forEach(function(s){hd.push(sn(s.name,l));cw.push(sw);});hd.push(rt('total',l),'%');cw.push(72,40);if(o.gpa){hd.push('GPA');cw.push(38);}hd.push(rt('res',l));cw.push(58);cw[ni]=mw-sum(cw);
+  var hv=function(v){return '';};
   var rows=rowsFor(r,o.type).map(function(x){var a=[];if(mer)a.push(B(x.rank));a.push(pName(x,l),B(x.roll||''));
     subs.forEach(function(s){var t=x.subs[s.id];a.push(t&&t.ab?rt('abs',l):(t&&t.t!=null?B(t.t)+hv(hiOf(r,s)):'—'));});
     a.push(B(x.total)+hv(r.hi&&r.hi.total),B(x.pct));if(o.gpa)a.push(B(rowGpa(r,x).toFixed(2)));a.push(rowPass(r,x)?rt('pass',l):rt('fail',l));return a;});
+  if(o.hi&&r.hi){var hr=[];if(mer)hr.push('');hr.push(rt('hi',l),'');subs.forEach(function(s){var v=hiOf(r,s);hr.push(v==null?'—':B(v));});hr.push(r.hi.total!=null?B(r.hi.total):'—','');if(o.gpa)hr.push('');hr.push('');rows.push(hr);}
   P.gridTable(d,hd,rows,cw,F,9.5);if(o.hi){d.y+=6;d.p(rt('note',l),{s:9,w:400,f:F,col:'#000',lh:13});}return d;};}
 /* one student's marksheet, in one language, with the class-highest mark next to every mark */
 function sheetBuild(r,x,o){o=o||{};return function(P){var l=o.lang||'bn',F=P.PFONT(),B=function(v){return pdig(P,l,v);},tt=rt('sheet',l),d=new P.Doc({paper:'A4',m:44,plain:true,bnf:true,enp:l==='en',foot:rtt(r,l)+' · '+tt});d.title=rtt(r,l)+' - '+tt;
@@ -2640,28 +2701,45 @@ function sheetBuild(r,x,o){o=o||{};return function(P){var l=o.lang||'bn',F=P.PFO
   d.y+=46;d.room(44);c=d.c;c.strokeStyle='#000';c.lineWidth=.8;c.beginPath();c.moveTo(m,d.y);c.lineTo(m+150,d.y);c.moveTo(d.W-m-150,d.y);c.lineTo(d.W-m,d.y);c.stroke();d.set({s:11,w:700,f:F});c.fillStyle='#000';c.fillText(rt('ct',l),m+30,d.y+14);c.fillText(rt('hd',l),d.W-m-140,d.y+14);var _in=instLine(l);if(_in){d.set({s:9,w:600,f:F});c.textAlign='right';c.fillText(fitLine2(c,_in,200),d.W-m,d.y+27);c.textAlign='left';}return d;};}
 /* ---- on-screen result ---- */
 function ptSeg(opts,cur,on){var b=E('div',{class:'pt-seg'});opts.forEach(function(p){b.appendChild(E('button',{class:p[0]===cur?'on':'',onclick:function(){on(p[0]);}},p[1]));});return b;}
-function renderResult(m,r,o){o=o||{};var ro=ropt(r);o.lang=o.lang||LANG;o.hi=o.hi!==false;if(o.gpa===undefined)o.gpa=ro.gpa;
-  var canMerit=!!o.staff||ro.merit;o.type=canMerit?(o.type||'merit'):'basic';var host=E('div');m.appendChild(host);
+function renderResult(m,r,o){o=o||{};var ro=ropt(r);o.lang=o.lang||LANG;o.hi=o.hi!==false;if(o.gpa===undefined)o.gpa=ro.gpa;rsCss();
+  var canMerit=!!o.staff||ro.merit,host=E('div');m.appendChild(host);
   function paint(){host.innerHTML='';inLang(o.lang,function(){body();});}
-  function body(){var L=o.lang,own=!o.staff&&!ro.merit,rows=rowsFor(r,o.type).filter(function(x){return !own||x.uid===o.me;}),list=E('div'),mer=o.type==='merit',hiTot=r.hi&&r.hi.total!=null?r.hi.total:'—';
+  function dl(build,file,b){var P=window.IQQUIZ&&IQQUIZ._pdf;if(!P){toast(X('PDF engine did not load','PDF ইঞ্জিন লোড হয়নি'));return;}var t=b.textContent;b.disabled=true;b.textContent='…';
+    P.prep().then(function(){return loadBrand();}).then(function(){return build(P);}).then(function(d){d.finish();return P.pdfBlob(d);}).then(function(bl){var a=E('a',{href:URL.createObjectURL(bl),download:file});document.body.appendChild(a);a.click();a.remove();toast(X('Saved ','সংরক্ষিত: ')+file);},function(){toast(X('Could not create the PDF','PDF তৈরি করা যায়নি'));}).then(function(){b.disabled=false;b.textContent=t;});}
+  function prow(icon,title,desc,build,file,title2,noPrev){return E('div',{class:'rs-pr'},E('div',{class:'rs-pi'},icon),E('div',{class:'rs-pt'},E('b',null,title),E('small',null,desc)),
+    E('div',{class:'rs-pb'},noPrev?null:E('button',{class:'q-btn g',onclick:function(){resPrint(build,file,title2||title);}},X('Preview','প্রিভিউ')),E('button',{class:'q-btn',onclick:function(){var b=this;if(build.csv)build.csv();else dl(build,file,b);}},X('Download','ডাউনলোড'))));}
+  function body(){var L=o.lang,own=!o.staff&&!ro.merit,ty=canMerit?'merit':'basic',mer=ty==='merit',rows=rowsFor(r,ty).filter(function(x){return !own||x.uid===o.me;}),list=E('div'),hiTot=r.hi&&r.hi.total!=null?r.hi.total:'—',
+      oM=Object.assign({},o,{type:'merit',lang:L}),oB=Object.assign({},o,{type:'basic',lang:L}),myRow=o.me?(r.rows||[]).filter(function(x){return x.uid===o.me;})[0]:null;
     host.appendChild(E('div',{class:'qt h0'},E('h3',null,rtt(r,L)),E('div',null,r.date?E('span',{class:'qpill'},r.date):null,r.cls?E('span',{class:'qpill'},rt('cls',L)+' '+r.cls):null,E('span',{class:'qpill'},(own?(r.rows||[]).length:rows.length)+' '+rt('cnt',L)),E('span',{class:'qpill on'},rt('full',L)+' '+r.max)),E('div',{class:'qm'},rt('hiS',L)+': '+hiTot+' / '+r.max)));
-    /* options bar: language / result type / GPA / highest */
     var bar=E('div',{class:'qt h2 pt-obar'});
     bar.appendChild(E('div',{class:'pt-orow'},E('span',null,X('Language','ভাষা')),ptSeg([['bn','বাংলা'],['en','English']],o.lang,function(v){o.lang=v;paint();})));
-    bar.appendChild(E('div',{class:'pt-orow'},E('span',null,X('Result type','ফলাফলের ধরন')),ptSeg(canMerit?[['basic',rt('basic',L)],['merit',rt('merit',L)]]:[['basic',rt('basic',L)]],o.type,function(v){o.type=v;paint();})));
     if(o.staff)bar.appendChild(E('label',{class:'pt-chk'},E('input',{type:'checkbox',checked:!!o.gpa,onchange:function(){o.gpa=this.checked;paint();}}),E('span',null,X('Include GPA','GPA অন্তর্ভুক্ত করুন'))));
-    bar.appendChild(E('label',{class:'pt-chk'},E('input',{type:'checkbox',checked:!!o.hi,onchange:function(){o.hi=this.checked;paint();}}),E('span',null,X('Show highest mark beside every mark','প্রতিটি নম্বরের পাশে সর্বোচ্চ নম্বর দেখান'))));
-    if(!own)bar.appendChild(E('div',{class:'qgrid qg2'},E('button',{class:'q-btn',style:'margin:0',onclick:function(){resPrint(listBuild(r,o),fileOf((mer?'merit_':'result_')+r.title)+'_'+o.lang+'.pdf',(mer?rt('merit',o.lang):rt('basic',o.lang))+' — '+r.title);}},X('Preview ','প্রিভিউ ')+(mer?rt('merit',L):rt('basic',L))),
-      o.csv?E('button',{class:'q-btn g',style:'margin:0',onclick:function(){csvOut(r,o);}},'CSV'):null));
+    bar.appendChild(E('label',{class:'pt-chk'},E('input',{type:'checkbox',checked:!!o.hi,onchange:function(){o.hi=this.checked;paint();}}),E('span',null,X('Show the class-highest row','শ্রেণির সর্বোচ্চ নম্বরের সারি দেখান'))));
     host.appendChild(bar);
-    resSummary(host,r,o);var sr=E('input',{class:'q-in',placeholder:X('Search by name or roll…','নাম বা রোল দিয়ে খুঁজুন…'),oninput:function(){draw(this.value);}});host.appendChild(sr);host.appendChild(list);
+    var pc=E('div',{class:'rs-card'},E('div',{class:'rs-h'},E('span',null,'📄'),E('div',null,E('b',null,X('Preview & download','প্রিভিউ ও ডাউনলোড')),E('small',null,X('Every version is available — preview it or save it as a PDF.','সব ধরনের ফলাফল দেখা যাবে — প্রিভিউ করুন বা PDF হিসেবে নামান।')))));
+    if(!own){if(canMerit)pc.appendChild(prow('🏆',rt('merit',L),X('Ranked by total marks','মোট নম্বর অনুযায়ী ক্রম'),listBuild(r,oM),fileOf('merit_'+r.title)+'_'+L+'.pdf',rt('merit',L)+' — '+r.title));
+      pc.appendChild(prow('📋',rt('basic',L),X('All students in roll order','সব শিক্ষার্থী রোল অনুযায়ী'),listBuild(r,oB),fileOf('result_'+r.title)+'_'+L+'.pdf',rt('basic',L)+' — '+r.title));}
+    if(myRow)pc.appendChild(prow('🎓',X('My marksheet','আমার মার্কশিট'),X('Your own subject-wise marksheet','আপনার নিজের বিষয়ভিত্তিক মার্কশিট'),sheetBuild(r,myRow,{lang:L,gpa:!!o.gpa,merit:mer}),'marksheet_'+fileOf(myRow.roll||myRow.uid)+'_'+L+'.pdf',rt('sheet',L)+' — '+pName(myRow,L)));
+    if(o.csv&&!own){var cb=function(){csvOut(r,oM);};cb.csv=cb;pc.appendChild(prow('📊','CSV',X('Spreadsheet for Excel','এক্সেলের জন্য স্প্রেডশিট'),cb,'',null,true));}
+    host.appendChild(pc);
+    resSummary(host,r,Object.assign({},o,{type:ty}));
+    if(o.hi&&!own&&r.hi){var hg=E('div',{class:'rs-grid'});r.subjects.forEach(function(s){var v=hiOf(r,s);hg.appendChild(E('div',{class:'rs-bx hi'},E('small',null,sn(s.name,L)),E('b',null,(v==null?'—':v)+'/'+s.max)));});hg.appendChild(E('div',{class:'rs-bx hi'},E('small',null,rt('total',L)),E('b',null,hiTot+'/'+r.max)));
+      host.appendChild(E('div',{class:'rs-card'},E('div',{class:'rs-h'},E('span',null,'⭐'),E('div',null,E('b',null,rt('hi',L)),E('small',null,X('Highest mark in each subject','প্রতিটি বিষয়ে সর্বোচ্চ নম্বর')))),hg));}
+    var sr=E('input',{class:'q-in',placeholder:X('Search by name or roll…','নাম বা রোল দিয়ে খুঁজুন…'),oninput:function(){draw(this.value);}});host.appendChild(sr);host.appendChild(list);
+    host.appendChild(E('div',{class:'rs-card rs-leg'},E('b',null,X('How to read this','কীভাবে পড়বেন')),
+      E('div',null,E('i',{class:'rs-sw hi'}),X('Green box — the highest mark in the class for that subject.','সবুজ ঘর — ওই বিষয়ে শ্রেণির সর্বোচ্চ নম্বর।')),
+      E('div',null,E('i',{class:'rs-sw bad'}),X('Red box — a failed mark (below the pass mark, or absent).','লাল ঘর — অকৃতকার্য নম্বর (পাস নম্বরের নিচে বা অনুপস্থিত)।')),
+      E('div',null,E('i',{class:'rs-sw fin'}),X('PASSED / FAILED — the final result of the student.','PASSED / FAILED — শিক্ষার্থীর চূড়ান্ত ফলাফল।')),
+      o.staff?null:E('div',{class:'qm',style:'margin-top:6px'},X('You can view everyone’s results, but you can ask a question or request a review only about your own result.','আপনি সবার ফলাফল দেখতে পারবেন, কিন্তু প্রশ্ন বা পুনঃনিরীক্ষণের অনুরোধ শুধু নিজের ফলাফলের জন্যই করতে পারবেন।'))));
     function draw(q){q=String(q||'').toLowerCase().trim();list.innerHTML='';inLang(o.lang,function(){
       rows.forEach(function(x,i){if(q&&(String(x.nameBn)+' '+x.name+' '+x.roll).toLowerCase().indexOf(q)<0)return;
-        var mine=o.me&&x.uid===o.me,chips=E('div',{style:'margin-top:6px'});
-        r.subjects.forEach(function(s){var t=x.subs[s.id]||{},hv=hiOf(r,s),p=E('span',{class:'qpill'},sn(s.name,L)+' '+(t.ab?rt('abs',L):(t.t==null?'—':t.t))+'/'+s.max);if(o.hi&&hv!=null)p.appendChild(E('em',{class:'pt-hv'},' · '+rt('hiS',L)+' '+hv));chips.appendChild(p);});
+        var mine=!!(o.me&&x.uid===o.me),tg=E('div',{class:'rs-grid'});
+        r.subjects.forEach(function(s){var t=x.subs[s.id]||{},hv=hiOf(r,s),failS=!!t.ab||(t.t!=null&&s.max&&t.t/s.max*100<passPct()),isHi=!failS&&t.t!=null&&hv!=null&&t.t===hv&&hv>0;
+          tg.appendChild(E('div',{class:'rs-bx'+(failS?' bad':isHi?' hi':'')},E('small',null,sn(s.name,L)),E('b',null,(t.ab?rt('abs',L):(t.t==null?'—':t.t))+'/'+s.max)));});
+        var okT=rowPass(r,x);tg.appendChild(E('div',{class:'rs-bx tot'+(!okT?' bad':(hiTot!=='—'&&x.total===hiTot?' hi':''))},E('small',null,rt('total',L)),E('b',null,x.total+'/'+r.max)));
         list.appendChild(E('div',{class:'qt h'+(i%4)+(mine?' pt-me2':'')},E('div',{class:'qrow2',style:'flex-wrap:nowrap'},mer?E('span',{class:'pt-rank'},String(x.rank)):null,
           E('div',{style:'flex:1;min-width:0'},E('b',null,pName(x,L)),E('div',{class:'qm'},[x.cls?rt('cls',L)+' '+x.cls:'',x.roll?rt('roll',L)+' '+x.roll:''].filter(Boolean).join(' · '))),
-          E('div',{style:'text-align:right'},E('b',{style:'font:700 18px var(--fd)'},x.total+'/'+r.max),E('div',{class:'qm'},x.pct+'%'),o.hi?E('div',{class:'qm pt-hv'},rt('hiS',L)+' '+hiTot):null)),chips,rowExtra(r,x,mine,o)));});
+          E('div',{style:'text-align:right'},E('b',{style:'font:700 18px var(--fd)'},x.pct+'%'),E('span',{class:'rs-res '+(okT?'ok':'no')},okT?rt('pass',L):rt('fail',L)))),tg,rowExtra(r,x,mine,o)));});
       if(!list.firstChild)list.appendChild(empty(X('Nothing found.','কিছু পাওয়া যায়নি।')));});}
     draw('');}
   paint();}
@@ -2679,10 +2757,10 @@ function resSummary(m,r,o){var rows=r.rows||[];if(!rows.length)return;var L=o.la
   box.appendChild(E('div',{class:'qsec'},X('Subject-wise average','বিষয়ভিত্তিক গড়')));r.subjects.forEach(function(s){var ts=rows.map(function(x){return x.subs[s.id];}).filter(function(t){return t&&t.t!=null&&!t.ab;}),a=ts.length?sum(ts.map(function(t){return t.t;}))/ts.length:0,p=s.max?Math.round(a/s.max*100):0,hv=hiOf(r,s);box.appendChild(E('div',{class:'pt-sb'},E('span',null,sn(s.name,L)),E('div',null,E('i',{style:'width:'+p+'%'})),E('b',null,(Math.round(a*10)/10)+'/'+s.max+(hv!=null?' · '+rt('hiS',L)+' '+hv:''))));});
   if(r.revN)box.appendChild(E('div',{class:'qhint'},X('This result has been revised '+r.revN+' time(s) (latest '+fmtT(r.revAt)+'). Revised students are marked "Revised".','এই ফলাফল '+r.revN+' বার সংশোধিত হয়েছে (সর্বশেষ '+fmtT(r.revAt)+')। সংশোধিত শিক্ষার্থীর পাশে "সংশোধিত" চিহ্ন আছে।')));
   m.appendChild(box);}
-function rowExtra(r,x,mine,o){var L=o.lang||LANG,g=gradeOf(x.pct),ps=rowPass(r,x),d=E('div',{style:'margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center'},E('span',{class:'qpill'},rt('grade',L)+' '+g.l),o.gpa?E('span',{class:'qpill'},'GPA '+rowGpa(r,x).toFixed(2)):null,E('span',{class:'qpill '+(ps?'on':'off')},ps?rt('pass',L):rt('fail',L)),x.rev?E('span',{class:'qpill off'},rt('rev',L)+' '+fmtD(x.rev)):null);
+function rowExtra(r,x,mine,o){var L=o.lang||LANG,g=gradeOf(x.pct),ps=rowPass(r,x),d=E('div',{style:'margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center'},E('span',{class:'qpill'},rt('grade',L)+' '+g.l),o.gpa?E('span',{class:'qpill'},'GPA '+rowGpa(r,x).toFixed(2)):null,x.rev?E('span',{class:'qpill off'},rt('rev',L)+' '+fmtD(x.rev)):null);
   if(x.rem)d.appendChild(E('div',{class:'qm',style:'flex-basis:100%'},rt('rem',L)+': '+x.rem));
   if(mine||o.staff)d.appendChild(E('button',{class:'q-btn g',style:'margin:0;padding:6px 10px',onclick:function(){resPrint(sheetBuild(r,x,{lang:L,gpa:!!o.gpa,merit:o.type==='merit'}),'marksheet_'+fileOf(x.roll||x.uid)+'_'+L+'.pdf',rt('sheet',L)+' — '+pName(x,L));}},'📄 '+X('Preview marksheet','মার্কশিট প্রিভিউ')));
-  if(mine&&r.id)d.appendChild(E('button',{class:'q-btn g',style:'margin:0;padding:6px 10px',onclick:function(){askQuery(r,x);}},'💬 '+X('Ask a question','প্রশ্ন করুন')));
+  if(mine&&S.mode==='student'&&x.uid===S.u.uid&&r.id)d.appendChild(E('button',{class:'q-btn g',style:'margin:0;padding:6px 10px',onclick:function(){askQuery(r,x);}},'💬 '+X('Ask a question','প্রশ্ন করুন')));
   return d;}
 
 /* ===== v8: publish dialog (GPA / merit control), notify-all-examinees with preview, delivery options ===== */
@@ -2879,6 +2957,14 @@ function start(){
 window.IQPORTAL={start:start,_t:{S:S,V:V,entry:entry,publishDlg:publishDlg,publish:publish,getMarks:getMarks,examinees:examinees,profileForm:profileForm,subNotices:subNotices,setLang:setLang,syncResult:syncResult,listBuild:listBuild,sheetBuild:sheetBuild,renderResult:renderResult,rowPass:rowPass,compute:compute,gradeOf:gradeOf,E:E}};
 })();
 
+/* ===== notices: one place for send / questions ===== */
+var _vn=V.notices;V.notices=function(m,p){var r=_vn(m,p);if(S.mode!=='student'){var row=E('div',{class:'qgrid qg2',style:'margin:0 0 10px'},E('button',{class:'q-btn',onclick:function(){go('compose');}},X('Send a notice','নোটিশ পাঠান')),E('button',{class:'q-btn g',onclick:function(){go('queries');}},X('Questions & answers','প্রশ্ন ও উত্তর')));m.insertBefore(row,m.children[1]||null);}return r;};
+/* people who registered without an institution are filed under the default one, once per session */
+function backfillInst(){if(!(S.admin&&!S.va)||S.bf)return;var id=defInstId(true);if(!id)return;S.bf=1;var f=S.f;Promise.all([usersBy('student'),usersBy('teacher')]).then(function(r){return Promise.all(r[0].concat(r[1]).filter(function(u){return !u.instId&&!u.headOf&&u.status!=='rejected';}).map(function(u){return f.fs.setDoc(f.fs.doc(f.db,'users',u.uid),{instId:id},{merge:true});}));}).catch(function(){});}
+/* old demo records are removed once, silently */
+var DI='demo_inst',DX='demo_exam';
+function demoCleanup(){if(!(S.admin&&!S.va)||!(S.insts||[]).some(function(i){return i.id===DI;}))return;var f=S.f,fs=f.fs,db=f.db;
+  feeDocs([fs.where('instId','==',DI)]).catch(function(){return [];}).then(function(fees){var b=fs.writeBatch(db),k;fees.forEach(function(r){b.delete(fs.doc(db,'fees',r.id));});for(k=1;k<=6;k++)b.delete(fs.doc(db,'exams',DX,'marks','demo_s'+k));b.delete(fs.doc(db,'results',DX));b.delete(fs.doc(db,'exams',DX));b.delete(fs.doc(db,'institutions',DI));return b.commit();}).then(function(){return loadInsts();}).catch(function(){});}
 </script>
 <!-- FIRESTORE RULES (reference copy, never executed). This is the same text as firestore.rules in Firebase.
  If you change the rules in Firebase, paste the new text here too, so the next Claude chat knows how the app is protected. -->
@@ -2937,6 +3023,18 @@ service cloud.firestore {
             && request.resource.data.get('roll','') == resource.data.get('roll','')
             && !('headOf' in request.resource.data)
             && photoOk())
+        // approved edit request: one edit of the person's own details (role, roll, status, institution stay as they are)
+        || (signed() && request.auth.uid == uid
+            && resource.data.status == 'approved'
+            && exists(/databases/$(database)/documents/editReqs/$(uid))
+            && get(/databases/$(database)/documents/editReqs/$(uid)).data.status == 'approved'
+            && request.resource.data.uid == uid
+            && request.resource.data.role == resource.data.role
+            && request.resource.data.status == 'approved'
+            && request.resource.data.get('roll','') == resource.data.get('roll','')
+            && request.resource.data.get('instId','') == resource.data.get('instId','')
+            && request.resource.data.get('headOf','') == resource.data.get('headOf','')
+            && photoOk())
         // the head of an institution: edits hand-made students, approves people of the same institution
         || (isHead() && resource.data.get('instId','') == headInst()
             && request.resource.data.get('instId','') == headInst()
@@ -2969,6 +3067,18 @@ service cloud.firestore {
       allow read: if signed();
       allow create: if isMaster() || (signed() && id == 'roll' && request.resource.data.n == 10001);
       allow update: if isMaster() || (signed() && id == 'roll' && request.resource.data.n == resource.data.n + 1);
+    }
+    // edit requests: one document per person (id = uid)
+    match /editReqs/{id} {
+      allow get: if signed() && (request.auth.uid == id || isMaster());
+      allow list: if isMaster();
+      allow create: if signed() && request.auth.uid == id && request.resource.data.uid == id
+        && request.resource.data.status == 'pending';
+      allow update: if isMaster()
+        || (signed() && request.auth.uid == id
+            && ((resource.data.status == 'approved' && request.resource.data.status == 'used')
+                || (resource.data.status in ['used','rejected'] && request.resource.data.status == 'pending')));
+      allow delete: if isMaster() || (signed() && request.auth.uid == id);
     }
     match /fees/{id} {
       allow read: if isMaster() || (signed() && resource.data.uid == request.auth.uid)
