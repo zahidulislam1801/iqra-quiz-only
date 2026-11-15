@@ -2633,7 +2633,7 @@ function pv(u,k){var a=LANG==='bn'?'Bn':'En',b=LANG==='bn'?'En':'Bn';return u[k+
 function personCard(u){var l=[];
   if(u.role==='student'){l.push([u.cls?clsLab(u.cls)+(verTxt(u)?' ('+verTxt(u)+')':''):'',u.roll?X('Roll ','রোল ')+u.roll:'',pv(u,'nick')?X('Nickname: ','ডাকনাম: ')+pv(u,'nick'):''].filter(Boolean).join(' \u00B7 '));l.push(pv(u,'inst'));l.push(pv(u,'father')?X('Father: ','পিতা: ')+pv(u,'father'):'');l.push(pv(u,'mother')?X('Mother: ','মাতা: ')+pv(u,'mother'):'');l.push(pv(u,'address'));l.push(phLine(u));}
   else{l.push(u.roll?X('ID No ','আইডি নং ')+u.roll:'');l.push(pv(u,'designation'));l.push(pv(u,'inst'));l.push(phLine(u));l.push(pv(u,'subjects')?X('Subjects: ','বিষয়: ')+pv(u,'subjects'):'');l.push(pv(u,'address'));}
-  return E('div',{class:'pt-pc'},avatar(u,54),E('div',{class:'pt-pi'},E('b',null,u.role==='student'?clsAddr(u):nm(u)),(u.nameEn&&u.nameBn)?E('div',{class:'qm'},LANG==='en'?u.nameBn:u.nameEn):null,l.filter(Boolean).map(function(x){return E('div',{class:'qm'},x);})));}
+  return E('div',{class:'pt-pc'},avatar(u,54),E('div',{class:'pt-pi'},E('b',null,nm(u)),(u.nameEn&&u.nameBn)?E('div',{class:'qm'},LANG==='en'?u.nameBn:u.nameEn):null,l.filter(Boolean).map(function(x){return E('div',{class:'qm'},x);})));}
 function profileForm(role,d,opt){opt=opt||{};var box=E('div',{class:'qt h1'}),ins={},photo=d.photo||'',HAS=/[ঀ-৿]/,
   PR=role==='student'?[['name','Name','নাম',1,'b'],['nick','Nickname','ডাকনাম',0,'s'],['father',"Father's name",'পিতার নাম',0,'s'],['inst','School name','স্কুলের নাম',0,'s'],['address','Address','ঠিকানা',0,'s']]:
     [['name','Name (in English)','নাম (ইংরেজিতে)',1,'e']];
@@ -2710,7 +2710,7 @@ function drawSide(){var side=S.side;if(!side)return;side.innerHTML='';var act=PA
   side.appendChild(E('div',{class:'pt-brand'},E('img',{src:brandLogo(),alt:'',style:'object-fit:contain'}),E('div',null,E('b',null,brandName()),E('div',{class:'qm'},S.admin?'\u09AE\u09BE\u09B8\u09CD\u099F\u09BE\u09B0 \u0985\u09CD\u09AF\u09BE\u09A1\u09AE\u09BF\u09A8':S.mode==='teacher'?'\u09B6\u09BF\u0995\u09CD\u09B7\u0995':'\u09B6\u09BF\u0995\u09CD\u09B7\u09BE\u09B0\u09CD\u09A5\u09C0'))));
   if(S.mode==='student'&&S.prof&&S.prof.nick)side.appendChild(E('div',{class:'pt-hi'},X('Hi, ','হাই, ')+callName(S.prof)+' \uD83D\uDC4B'));nav().forEach(function(sec){if(sec.h)side.appendChild(E('div',{class:'qsec'},sec.h));
     sec.items.forEach(function(it){side.appendChild(E('button',{class:'pt-nav'+(act===it[0]?' on':''),onclick:function(){go(it[0]);S.closeSide();}},ic(it[1]),E('span',{style:'flex:1;text-align:left'},it[2]),(it[0]==='approvals'&&S.pend)?E('span',{class:'pt-bdg'},String(S.pend)):((it[0]==='notices'&&S.unread)?E('span',{class:'pt-bdg'},String(S.unread)):null)));});});
-  if(isNat()||((S.admin||S.head)&&!S.va))side.appendChild(E('button',{class:'pt-nav',onclick:function(){if(window.IQUPD)window.IQUPD.open();else dlLauncher();S.closeSide();}},ic('update'),E('span',{style:'flex:1;text-align:left'},isNat()?X('App update','\u0985\u09cd\u09af\u09be\u09aa \u0986\u09aa\u09a1\u09c7\u099f'):X('Download app (APK)','\u0985\u09cd\u09af\u09be\u09aa (APK) \u09a1\u09be\u0989\u09a8\u09b2\u09cb\u09a1')),upAvail()?E('span',{class:'pt-bdg'},'1'):null));
+  if(isNat()||((S.admin||S.head)&&!S.va))side.appendChild(upTile());
   if(!isNat()&&canInstall())side.appendChild(E('button',{class:'pt-nav',onclick:function(){installApp();}},ic('update'),E('span',{style:'flex:1;text-align:left'},X('Install app','অ্যাপ ইনস্টল করুন'))));
   if(!isNat()&&pushReady()&&Notification.permission==='default'&&!pushDone())side.appendChild(E('button',{class:'pt-nav',onclick:function(){pushOn();}},ic('notices'),E('span',{style:'flex:1;text-align:left'},X('Turn on notifications','নোটিফিকেশন চালু করুন'))));
   side.appendChild(E('button',{class:'pt-nav',onclick:function(){setLang(LANG==='en'?'bn':'en');}},ic('lang'),E('span',{style:'flex:1;text-align:left'},LANG==='en'?'\u09AC\u09BE\u0982\u09B2\u09BE':'English')));side.appendChild(E('div',{class:'pt-me'},E('div',{class:'qm',style:'word-break:break-all'},S.u.email),E('button',{class:'q-btn g',style:'margin:6px 0 0;width:100%',onclick:signOutAsk},'\u09B8\u09BE\u0987\u09A8 \u0986\u0989\u099F')));}
@@ -2777,7 +2777,20 @@ function quizCard(L,i){var n=(L.q||[]).length,tm=L.s&&L.s.tm,sa=+L.sa||0,ea=+L.e
   return E('div',{class:'qt h'+(i%4)},E('div',{class:'qrow2',style:'flex-wrap:nowrap'},E('div',{style:'min-width:0;flex:1'},E('h3',{style:'margin:0 0 2px'},L.title||X('Quiz','কুইজ')),L.desc?E('div',{class:'qm'},L.desc):null),L.done?E('span',{class:'qpill on'},'✓ '+X('Done','সম্পন্ন')):E('span',{class:'qpill off'},X('To do','করণীয়'))),
   E('div',{style:'margin:6px 0'},E('span',{class:'qpill'},bd(n)+X(' questions',' টি প্রশ্ন')),tm?E('span',{class:'qpill'},bd(tm)+X(' min',' মিনিট')):null,sa?E('span',{class:'qpill'},X('Starts ','শুরু ')+fdt(sa)):null,ea?E('span',{class:'qpill'},X('Ends ','শেষ ')+fdt(ea)):(L.exp?E('span',{class:'qpill'},X('Until ','শেষ ')+fmtD(L.exp)):null)),
   cd,btn);}
-function studentHome(u,m,own){rsCss();m.appendChild(E('div',{class:'hm-hero'},E('div',{class:'hm-l'},E('small',null,X('Hello,','হ্যালো,')),E('b',null,callName(u)+' \uD83D\uDC4B'),E('span',null,[isCarat(u.cls)?clsAddr(u):nm(u),(u.cls&&!isCarat(u.cls))?clsLab(u.cls):''].filter(Boolean).join(' · '))),E('div',{class:'hm-roll'},E('small',null,X('ROLL','রোল')),E('b',null,u.roll||'—'))));m.appendChild(E('div',{class:'qt h1'},personCard(u)));if(own){matHome(u,m);var qz=E('div');m.appendChild(qz);myQuizzes(u).then(function(a){if(!a.length)return;qz.appendChild(E('div',{class:'qsec'},'📝 '+X('Assigned to you','আপনার জন্য নির্ধারিত')));a.forEach(function(L,i){qz.appendChild(quizCard(L,i));});},function(){});}
+/* student home: new exams (assigned quizzes) and newly published results come first */
+function seenRes(){try{return JSON.parse(localStorage.getItem('iq.seenRes')||'[]');}catch(e){return [];}}
+function markSeen(id){var a=seenRes();if(a.indexOf(id)<0){a.push(id);try{localStorage.setItem('iq.seenRes',JSON.stringify(a.slice(-80)));}catch(e){}}}
+function homeNew(u,top){var qz=E('div'),rz=E('div');top.appendChild(qz);top.appendChild(rz);
+  myQuizzes(u).then(function(a){if(!a.length)return;qz.appendChild(E('div',{class:'qsec'},'📝 '+X('New exam for you','আপনার জন্য নতুন পরীক্ষা')));a.forEach(function(L,i){qz.appendChild(quizCard(L,i));});},function(){});
+  loadResults().then(function(rs){var seen=seenRes(),now=Date.now(),a=[];
+    rs.forEach(function(r){var row=(r.rows||[]).filter(function(x){return x.uid===u.uid;})[0];if(!row)return;if((!r.pubAt||now-r.pubAt<14*864e5)&&seen.indexOf(r.id)<0)a.push({r:r,row:row});});
+    if(!a.length)return;a.sort(function(x,y){return (y.r.pubAt||0)-(x.r.pubAt||0);});
+    rz.appendChild(E('div',{class:'qsec'},'🆕 '+X('New result published','নতুন ফলাফল প্রকাশিত')));
+    a.slice(0,3).forEach(function(x,i){var r=x.r,row=x.row;
+      rz.appendChild(E('div',{class:'qt h'+((i+1)%4)},E('div',{class:'qrow2',style:'flex-wrap:nowrap'},E('div',{style:'min-width:0'},E('h3',null,r.title,' ',E('span',{class:'iqup-new'},X('NEW','নতুন'))),E('div',{class:'qm'},[r.date,r.cls?X('Class ','শ্রেণি ')+r.cls:''].filter(Boolean).join(' · '))),E('div',{style:'text-align:right'},E('b',{style:'font:700 20px var(--fd);color:'+(!rowPass(r,row)?'#d0243f':'inherit')},row.total+'/'+r.max),E('div',{class:'qm'},row.pct+'% · '+X('Rank ','র্যাংক ')+row.rank+'/'+(r.n||(r.rows||[]).length)))),
+        E('button',{class:'q-btn',style:'margin-top:8px',onclick:function(){markSeen(r.id);go('resview',{id:r.id});}},X('View full result','পূর্ণ ফলাফল দেখুন'))));});
+  },function(){});}
+function studentHome(u,m,own){rsCss();m.appendChild(E('div',{class:'hm-hero'},E('div',{class:'hm-l'},E('small',null,X('Hello,','হ্যালো,')),E('b',null,callName(u)+' \uD83D\uDC4B'),E('span',null,nm(u))),E('div',{class:'hm-roll'},E('small',null,X('ROLL','রোল')),E('b',null,u.roll||'—'))));var top=E('div',{class:'hm-new'});if(own)m.appendChild(top);m.appendChild(E('div',{class:'qt h1'},personCard(u)));if(own){matHome(u,m);homeNew(u,top);}
   var box=E('div');m.appendChild(box);box.appendChild(loadMsg());
   loadResults().then(function(rs){box.innerHTML='';var mine=[];
     rs.forEach(function(r){var row=(r.rows||[]).filter(function(x){return x.uid===u.uid;})[0];if(row)mine.push({r:r,row:row});});
@@ -3190,10 +3203,10 @@ V.compose=function(m,p){head(m,X('Send a notice','নোটিশ / বার্
   function build(u){var n=callName(u),b=fill(bo.value,u),hasN=/\{name\}/.test(bo.value);b=b.replace(/\{name\}/g,n);if(o.sal!=='n'&&!hasN)b=salOf(u,lg,o.sal)+'\n'+b;return{t:fill(ti.value,u).replace(/\{name\}/g,n),b:b,sig:sigOf(u.instId||S.head||(S.prof&&S.prof.instId)||'',lg),inst:u.instId||S.head||(S.prof&&S.prof.instId)||''};}
   function applyT(t){var k=lg==='bn'?1:0;tpl=t.k;o.man=false;o.sal=defSal();syncSal();if(t.k==='fee')setDue();ti.value=t.t[k];bo.value=t.b[k];drawChips();draw();}
   function drawChips(){chips.innerHTML='';NTPL.forEach(function(t){chips.appendChild(E('button',{class:'q-btn'+(tpl===t.k?'':' g'),style:'margin:0;padding:6px 11px;font-size:12.5px',onclick:function(){applyT(t);}},t.i+' '+t.l[LANG==='bn'?1:0]));});}
-  function recLoad(){rec=null;pvU=null;draw();var a=au.value;if(a==='user'){if(!ul){ul=[];usr.innerHTML='';usr.appendChild(E('option',{value:''},X('Loading…','লোড হচ্ছে…')));Promise.all([usersBy('student'),S.admin?usersBy('teacher'):Promise.resolve([])]).then(function(r){ul=sortPeople(r[0].concat(r[1]).filter(function(u){return u.status==='approved';}));usr.innerHTML='';usr.appendChild(E('option',{value:''},'— '+X('Select','নির্বাচন করুন')+' —'));ul.forEach(function(u,i){usr.appendChild(E('option',{value:i},nm(u)+(u.role==='teacher'?' ('+X('teacher','শিক্ষক')+')':(u.cls?' · '+clsLab(u.cls):'')+(u.roll?' · '+X('Roll ','রোল ')+u.roll:''))));});},function(){toast(X('Could not load the list','তালিকা আনা যায়নি'));});}
+  function recLoad(){rec=null;pvU=null;draw();var a=au.value;if(a==='user'){if(!ul){ul=[];usr.innerHTML='';usr.appendChild(E('option',{value:''},X('Loading…','লোড হচ্ছে…')));Promise.all([usersBy('student'),S.admin?usersBy('teacher'):Promise.resolve([])]).then(function(r){ul=sortPeople(r[0].concat(r[1]).filter(function(u){return u.status==='approved';}));usr.innerHTML='';usr.appendChild(E('option',{value:''},'— '+X('Select','নির্বাচন করুন')+' —'));ul.forEach(function(u,i){usr.appendChild(E('option',{value:i},(u.role==='teacher'?nm(u):clsAddr(u))+(u.role==='teacher'?' ('+X('teacher','শিক্ষক')+')':(u.cls?' · '+clsLab(u.cls):'')+(u.roll?' · '+X('Roll ','রোল ')+u.roll:''))));});},function(){toast(X('Could not load the list','তালিকা আনা যায়নি'));});}
       if(ulPre&&usr.value==='all'){rec=ul.slice();pvU=ul[0];draw();return;}var u=ul&&ul[+usr.value];rec=u?[u]:[];pvU=u||null;draw();return;}
     var need=a==='teacher'?['teacher']:a==='all'?['student','teacher']:['student'];
-    Promise.all(need.map(usersBy)).then(function(r){var l=[];r.forEach(function(x){l=l.concat(x);});l=l.filter(function(u){return u.status==='approved'&&(a.slice(0,4)!=='cls:'||u.cls===a.slice(4))&&(!S.head||S.admin||u.instId===S.head);});rec=sortPeople(l);pvS.innerHTML='';rec.slice(0,60).forEach(function(u,i){pvS.appendChild(E('option',{value:i},callName(u)+' — '+nm(u)));});pvU=rec[0]||null;draw();},function(){rec=[];draw();});}
+    Promise.all(need.map(usersBy)).then(function(r){var l=[];r.forEach(function(x){l=l.concat(x);});l=l.filter(function(u){return u.status==='approved'&&(a.slice(0,4)!=='cls:'||u.cls===a.slice(4))&&(!S.head||S.admin||u.instId===S.head);});rec=sortPeople(l);pvS.innerHTML='';rec.slice(0,60).forEach(function(u,i){pvS.appendChild(E('option',{value:i},callName(u)+' — '+(u.role==='teacher'?nm(u):clsAddr(u))));});pvU=rec[0]||null;draw();},function(){rec=[];draw();});}
   au.onchange=function(){if(ulPre&&au.value!=='user'){ul=null;ulPre=false;}usr.style.display=au.value==='user'?'':'none';if(!o.man){o.sal=defSal();syncSal();}recLoad();};usr.onchange=recLoad;
   function draw(){pv.innerHTML='';var u=pvU||{nick:lg==='bn'?'রহিম':'Rahim',nameEn:'Rahim',nameBn:'রহিম'},nf=build(u),pop=o.pop||lv.value==='urgent';
     pv.appendChild(E('div',{class:'qsec'},X('Live preview','লাইভ প্রিভিউ')));
@@ -3597,24 +3610,64 @@ function upAvail(){return isNat()&&UC>0&&UI.a&&UI.a.build>UC;}
 function upGet(){var c=upCfg();if(!c.repo)return Promise.reject();return fetch('https://api.github.com/repos/'+c.repo+'/releases?per_page=10',{headers:{Accept:'application/vnd.github+json'},cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(l){var o={};[['a',c.at,/\.apk$/i],['w',c.wt,/\.(exe|msi)$/i]].forEach(function(x){var rel=l.filter(function(y){return y.tag_name===x[1];})[0];if(!rel)return;var as=(rel.assets||[]).filter(function(y){return x[2].test(y.name);})[0];if(!as)return;var b=/iq-build=(\d+)/.exec(rel.body||'');o[x[0]]={build:b?+b[1]:0,url:as.browser_download_url,size:as.size||0};});return o;});}
 function upCheck(force){var now=Date.now();if(!force&&UI.t&&now-UI.t<3*864e5)return Promise.resolve(true);return upGet().then(function(o){UI={t:Date.now(),a:o.a||UI.a,w:o.w||UI.w};try{localStorage.setItem(UK,JSON.stringify(UI));}catch(e){}drawSide();return true;}).catch(function(){return false;});}
 function upCur(){var P=plug('App');if(P&&P.getInfo)P.getInfo().then(function(i){UC=parseInt(i&&i.build,10)||0;drawSide();}).catch(function(){});}
-function upGo(url){var U=plug('IqUpdater');UM=X('Starting download\u2026','\u09a1\u09be\u0989\u09a8\u09b2\u09cb\u09a1 \u09b6\u09c1\u09b0\u09c1 \u09b9\u099a\u09cd\u099b\u09c7\u2026');
+/* ===== app update tile (lives in the sidebar; no popup card) ===== */
+var UP={st:'idle',pct:-1,ld:0,tt:0,msg:''},UT=null,UPL=false,UPT=0;
+(function(){if(document.getElementById('iqup-css'))return;var st=document.createElement('style');st.id='iqup-css';st.textContent='.iqup{margin:8px 0;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff}.iqup.new{border-color:var(--act-line);background:var(--act-soft)}.iqup.err{border-color:var(--bad-soft)}.iqup-h{display:flex;gap:10px;align-items:center}.iqup-h>div{min-width:0;flex:1}.iqup-h b{font:700 14px var(--f);color:var(--ink);display:block}.iqup-h small{font:500 12px/1.35 var(--f);color:var(--ink3);display:block}.iqup.err .iqup-h small{color:var(--bad)}.iqup-new{background:var(--act);color:#fff;border-radius:99px;font:700 10px var(--f);padding:2px 8px;letter-spacing:.4px}.iqup-bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin:10px 0 4px;position:relative}.iqup-fill{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--act),var(--act-hi));transition:width .3s}.iqup-fill.ind{position:absolute;width:38%;animation:iqupind 1.1s ease-in-out infinite}@keyframes iqupind{0%{left:-38%}100%{left:100%}}.iqup-n{font:600 11.5px var(--f);color:var(--ink2);display:flex;justify-content:space-between}.iqup-b{width:100%;margin-top:10px;border:0;border-radius:11px;padding:10px;font:700 13.5px var(--f);background:var(--act);color:#fff;cursor:pointer}.iqup-b.g{background:transparent;color:var(--act-deep);border:1px solid var(--act-line)}.pt-menu.upd{position:relative}.pt-menu.upd::after{content:"";position:absolute;top:5px;right:5px;width:9px;height:9px;border-radius:50%;background:var(--bad);border:2px solid #fff}';document.head.appendChild(st);})();
+function upMb(n){return (n/1048576).toFixed(1);}
+function upAgo(){if(!UI.t)return '';var d=Math.floor((Date.now()-UI.t)/864e5);return d<=0?X('Checked today','আজ চেক করা হয়েছে'):X('Checked '+d+' day'+(d>1?'s':'')+' ago',d+' দিন আগে চেক করা হয়েছে');}
+function upDot(){try{var m=document.querySelector('.pt-menu');if(m)m.classList.toggle('upd',!!upAvail());}catch(e){}}
+function upSub(){var a=UI.a;if(UP.msg)return UP.msg;
+  if(UP.st==='checking')return X('Looking for a new version…','নতুন ভার্সন খোঁজা হচ্ছে…');
+  if(UP.st==='dl')return X('Downloading…','ডাউনলোড হচ্ছে…');
+  if(UP.st==='inst')return X('Opening the installer…','ইনস্টলার খোলা হচ্ছে…');
+  if(UP.st==='done')return X('Download finished','ডাউনলোড শেষ');
+  if(isNat()){if(upAvail())return X('Version '+UC+' → '+a.build+' is ready','ভার্সন '+UC+' → '+a.build+' প্রস্তুত')+(a.size?' · '+upMb(a.size)+' MB':'');
+    if(a)return X('You have the latest version','আপনার কাছে সর্বশেষ ভার্সন আছে')+(UC?' (v'+UC+')':'');
+    return X('Tap to look for updates','আপডেট আছে কিনা দেখুন');}
+  if(a)return X('Android app is ready','অ্যান্ড্রয়েড অ্যাপ প্রস্তুত')+(a.size?' · '+upMb(a.size)+' MB':'');
+  return X('No app file published yet','এখনো অ্যাপ ফাইল প্রকাশ হয়নি');}
+function upBtn(){if(UP.st==='dl'||UP.st==='checking'||UP.st==='inst')return null;if(UP.st==='err')return [X('Try again','আবার চেষ্টা করুন'),0];
+  if(isNat())return upAvail()?[X('Update now','এখনই আপডেট করুন'),0]:[X('Check for update','আপডেট দেখুন'),1];
+  return UI.a?[X('Download APK','APK ডাউনলোড'),0]:[X('Check again','আবার দেখুন'),1];}
+function upPaint(){if(!UT)return;var busy=UP.st==='dl'||UP.st==='inst',b=upBtn(),nw=upAvail()&&!busy&&UP.st!=='err';
+  UT.r.className='iqup'+(nw?' new':'')+(UP.st==='err'?' err':'');
+  UT.sub.textContent=upSub();UT.ago.textContent=UP.st==='idle'&&!UP.msg?upAgo():'';UT.ago.style.display=UT.ago.textContent?'block':'none';
+  UT.nw.style.display=nw?'':'none';
+  UT.bar.style.display=busy?'':'none';UT.nt.style.display=busy?'flex':'none';
+  var ind=UP.pct<0||UP.st==='inst';UT.fill.className='iqup-fill'+(ind?' ind':'');UT.fill.style.width=ind?'':Math.min(100,UP.pct)+'%';
+  UT.n1.textContent=UP.st==='inst'?'':(UP.pct>=0?Math.round(UP.pct)+'%':'');
+  UT.n2.textContent=UP.tt?(UP.ld?upMb(UP.ld)+' / ':'')+upMb(UP.tt)+' MB':'';
+  UT.btn.style.display=b?'':'none';if(b){UT.btn.textContent=b[0];UT.btn.className='iqup-b'+(b[1]?' g':'');}
+  upDot();}
+function upSet(o){for(var k in o)UP[k]=o[k];upPaint();}
+function upTile(){var T={};
+  T.nw=E('span',{class:'iqup-new'},X('NEW','নতুন'));T.sub=E('small',null,'');T.ago=E('small',{style:'opacity:.8'},'');
+  T.fill=E('i',{class:'iqup-fill'});T.bar=E('div',{class:'iqup-bar'},T.fill);
+  T.n1=E('span',null,'');T.n2=E('span',null,'');T.nt=E('div',{class:'iqup-n'},T.n1,T.n2);
+  T.btn=E('button',{class:'iqup-b',onclick:function(){upAct();}},'');
+  T.r=E('div',{class:'iqup'},E('div',{class:'iqup-h'},ic('update'),E('div',null,E('b',null,isNat()?X('App update','অ্যাপ আপডেট'):X('Get the Android app','অ্যান্ড্রয়েড অ্যাপ নিন')),T.sub,T.ago),T.nw),T.bar,T.nt,T.btn);
+  UT=T;upPaint();return T.r;}
+function upAct(){if(UP.st==='dl'||UP.st==='checking'||UP.st==='inst')return;var a=UI.a;
+  if(UP.st!=='err'&&(isNat()?upAvail():!!a)){upGo(a.url,a.size);return;}
+  if(UP.st==='err'&&a&&(isNat()?upAvail():true)){upGo(a.url,a.size);return;}
+  upSet({st:'checking',msg:''});
+  upCheck(true).then(function(ok){upSet({st:'idle',msg:ok?'':X('Could not check right now. Try again later.','এখন চেক করা যায়নি। পরে চেষ্টা করুন।')});if(ok&&!upAvail()&&isNat())upSet({msg:X('You have the latest version','আপনার কাছে সর্বশেষ ভার্সন আছে')});});}
+function upGo(url,size){var U=plug('IqUpdater');upSet({st:'dl',pct:-1,ld:0,tt:size||0,msg:''});
   if(isNat()){
-    if(U&&U.downloadAndInstall){U.downloadAndInstall({url:url}).then(function(r){UM=r&&r.status==='needs-permission'?X('Allow "Install unknown apps" for this app, then tap Update again.','"Install unknown apps" \u0985\u09a8\u09c1\u09ae\u09a4\u09bf \u09a6\u09bf\u09a8, \u09a4\u09be\u09b0\u09aa\u09b0 \u0986\u09ac\u09be\u09b0 Update \u099a\u09be\u09aa\u09c1\u09a8\u0964'):X('Opening the installer\u2026','\u0987\u09a8\u09b8\u09cd\u099f\u09b2\u09be\u09b0 \u0996\u09cb\u09b2\u09be \u09b9\u099a\u09cd\u099b\u09c7\u2026');upDraw();}).catch(function(){UM=X('Could not download. Check the internet and try again.','\u09a1\u09be\u0989\u09a8\u09b2\u09cb\u09a1 \u09b9\u09af\u09bc\u09a8\u09bf\u0964 \u0987\u09a8\u09cd\u099f\u09be\u09b0\u09a8\u09c7\u099f \u09a6\u09c7\u0996\u09c7 \u0986\u09ac\u09be\u09b0 \u099a\u09c7\u09b7\u09cd\u099f\u09be \u0995\u09b0\u09c1\u09a8\u0964');upDraw();});}
-    else UM=X('This app build cannot update itself yet. Install the latest APK once.','\u098f\u0987 \u0985\u09cd\u09af\u09be\u09aa \u09ac\u09bf\u09b2\u09cd\u09a1 \u098f\u0996\u09a8\u09cb \u09a8\u09bf\u099c\u09c7 \u0986\u09aa\u09a1\u09c7\u099f \u0995\u09b0\u09a4\u09c7 \u09aa\u09be\u09b0\u09c7 \u09a8\u09be\u0964 \u09b8\u09b0\u09cd\u09ac\u09b6\u09c7\u09b7 APK \u098f\u0995\u09ac\u09be\u09b0 \u0987\u09a8\u09b8\u09cd\u099f\u09b2 \u0995\u09b0\u09c1\u09a8\u0964');
-  }else{var l=document.createElement('a');l.href=url;l.download='';l.rel='noopener';document.body.appendChild(l);l.click();setTimeout(function(){l.remove();},500);UM=X('Download started.','\u09a1\u09be\u0989\u09a8\u09b2\u09cb\u09a1 \u09b6\u09c1\u09b0\u09c1 \u09b9\u09af\u09bc\u09c7\u099b\u09c7\u0964');}
-  upDraw();}
-var UO=null;function upDraw(){if(!UO)return;var b=UO.querySelector('.iqx-box');b.innerHTML='';var nat=isNat(),a=UI.a,w=UI.w,fb=function(k){var c=upCfg();return c.repo?'https://github.com/'+c.repo+'/releases/latest':'';};
-  b.appendChild(E('h3',{style:'margin:0 0 6px'},'App update & download'));
-  b.appendChild(E('p',{class:'qm'},UM||(UI.t?'Last checked '+new Date(UI.t).toLocaleDateString()+'. Checks automatically every 3 days.':'Not checked yet.')));
-  if(!nat&&canInstall())b.appendChild(E('button',{class:'q-btn big',onclick:function(){installApp();}},'📲 '+X('Install the shortcut app','শর্টকাট অ্যাপ ইনস্টল করুন')));
-  if(nat&&upAvail())b.appendChild(E('button',{class:'q-btn big',onclick:function(){upGo(a.url);}},'Update now'));
-  else if(nat)b.appendChild(E('p',{class:'qm'},UI.a?'You have the latest version.':'No update information yet.'));
-  if(!nat){if(a)b.appendChild(E('button',{class:'q-btn big',onclick:function(){upGo(a.url);}},'Download for Android'+(a.size?' ('+(a.size/1048576).toFixed(1)+' MB)':'')));if(w)b.appendChild(E('button',{class:'q-btn',onclick:function(){upGo(w.url);}},'Download for Windows'));if(!a&&!w)b.appendChild(E('p',{class:'qm'},X('No app file has been published yet.','এখনো কোনো অ্যাপ ফাইল প্রকাশ হয়নি।')));}
-  b.appendChild(E('div',{class:'iqx-row',style:'margin-top:10px'},E('button',{class:'q-btn g',style:'margin:0',onclick:function(){UM='Checking…';upDraw();upCheck(true).then(function(ok){UM=ok?(upAvail()?'A new version is ready.':'Up to date.'):'Could not check right now.';upDraw();});}},'Check now'),E('button',{class:'q-btn g',style:'margin:0',onclick:function(){UO.remove();UO=null;}},'Close')));}
-window.IQUPD={open:function(){if(UO)UO.remove();UO=E('div',{class:'iqx-ov'},E('div',{class:'iqx-box'}));document.body.appendChild(UO);UM='';upDraw();upCheck(false).then(upDraw);}};
+    if(!(U&&U.downloadAndInstall)){upSet({st:'err',msg:X('This app build cannot update itself yet. Install the latest APK once by hand.','এই অ্যাপ বিল্ড এখনো নিজে আপডেট করতে পারে না। সর্বশেষ APK একবার হাতে ইনস্টল করুন।')});return;}
+    if(!UPL&&U.addListener){UPL=true;['downloadProgress','progress','onProgress','download-progress'].forEach(function(n){try{U.addListener(n,function(e){e=e||{};var p=e.percent!=null?+e.percent:e.progress!=null?(+e.progress<=1?+e.progress*100:+e.progress):((e.total||e.length)>0?(e.loaded||e.bytes||0)/(e.total||e.length)*100:-1);upSet({st:'dl',pct:p,ld:e.loaded||e.bytes||0,tt:e.total||e.length||size||0});});}catch(x){}});}
+    U.downloadAndInstall({url:url}).then(function(r){if(r&&r.status==='needs-permission')upSet({st:'err',msg:X('Allow "Install unknown apps" for this app, then tap Try again.','"Install unknown apps" অনুমতি দিন, তারপর আবার চেষ্টা করুন চাপুন।')});else{upSet({st:'inst',pct:100});clearTimeout(UPT);UPT=setTimeout(function(){upSet({st:'idle'});},10000);}}).catch(function(){upSet({st:'err',msg:X('Download failed. Check the internet and try again.','ডাউনলোড হয়নি। ইন্টারনেট দেখে আবার চেষ্টা করুন।')});});
+    return;}
+  var nm=decodeURIComponent(String(url).split('/').pop().split('?')[0])||'app.apk';
+  function viaLink(){var l=document.createElement('a');l.href=url;l.download=nm;l.rel='noopener';document.body.appendChild(l);l.click();setTimeout(function(){l.remove();},500);upSet({st:'done',pct:100,msg:X('Download started in your browser.','ডাউনলোড ব্রাউজারে শুরু হয়েছে।')});}
+  try{fetch(url).then(function(r){if(!r.ok||!r.body)throw 0;var tt=+r.headers.get('content-length')||size||0,ld=0,rd=r.body.getReader(),parts=[];
+    function pump(){return rd.read().then(function(x){if(x.done)return;parts.push(x.value);ld+=x.value.length;upSet({st:'dl',pct:tt?ld/tt*100:-1,ld:ld,tt:tt});return pump();});}
+    return pump().then(function(){var u=URL.createObjectURL(new Blob(parts,{type:'application/vnd.android.package-archive'})),l=document.createElement('a');l.href=u;l.download=nm;document.body.appendChild(l);l.click();setTimeout(function(){l.remove();URL.revokeObjectURL(u);},4000);upSet({st:'done',pct:100});});
+  }).catch(viaLink);}catch(e){viaLink();}}
+window.IQUPD={open:function(){try{S.side.classList.add('open');var bk=document.querySelector('.pt-back');if(bk)bk.classList.add('on');}catch(e){}upCheck(false).then(function(){try{drawSide();}catch(e){}});}};
 /* automatic check (at most once every 3 days) + one notice per new version */
-function upNotice(){try{if(!upAvail()||!S.u)return;var k='iq.upn',nb=String(UI.a.build);if(lsG(k)===nb)return;lsS(k,nb);
-  ask(X('A new version of the app is ready.','\u0985\u09cd\u09af\u09be\u09aa\u09c7\u09b0 \u09a8\u09a4\u09c1\u09a8 \u09ad\u09be\u09b0\u09cd\u09b8\u09a8 \u098f\u09b8\u09c7\u099b\u09c7\u0964'),X('See update','\u0986\u09aa\u09a1\u09c7\u099f \u09a6\u09c7\u0996\u09c1\u09a8'),function(){window.IQUPD.open();},X('Later','\u09aa\u09b0\u09c7'));}catch(e){}}
+function upNotice(){try{upDot();if(!upAvail()||!S.u)return;var k='iq.upn',nb=String(UI.a.build);if(lsG(k)===nb)return;lsS(k,nb);
+  toast(X('New app version ready. Open the menu to update.','অ্যাপের নতুন ভার্সন এসেছে। আপডেট করতে মেনু খুলুন।'));}catch(e){}}
 function upAuto(){upCur();upCheck(false).then(function(){try{drawSide();}catch(e){}upNotice();});}
 setTimeout(upAuto,3000);setInterval(function(){upCheck(false).then(function(){try{drawSide();}catch(e){}upNotice();});},6*36e5);
 document.addEventListener('visibilitychange',function(){if(!document.hidden)upCheck(false).then(function(){try{drawSide();}catch(e){}upNotice();});});
@@ -3631,19 +3684,7 @@ var DIP=null,NAGO=null,NAGW=0,TOKD=false;
 window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();DIP=e;try{drawSide();}catch(x){}setTimeout(function(){if(S.u&&!NAGO&&canInstall()&&!nagSnz('i')){NAGQ=['i'];nagNext();}},1500);});
 window.addEventListener('appinstalled',function(){DIP=null;lsS('iq.inst','1');nagKill();try{drawSide();}catch(x){}});
 function isStandalone(){try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;}catch(e){return false;}}
-function dlLauncher(){
-  /* real APK: taken from the GitHub release (tag android-latest) that the update centre already uses */
-  if(isNat()){try{window.IQUPD.open();}catch(e){}return;}
-  toast(X('Preparing the APK\u2026','APK \u09aa\u09cd\u09b0\u09b8\u09cd\u09a4\u09c1\u09a4 \u09b9\u099a\u09cd\u099b\u09c7\u2026'));
-  upGet().then(function(o){
-    var ap=o&&o.a;if(!ap||!ap.url)throw 0;
-    var l=document.createElement('a');l.href=ap.url;l.download='';l.rel='noopener';document.body.appendChild(l);l.click();
-    setTimeout(function(){l.remove();},500);
-    toast(X('Downloading the APK\u2026','APK \u09a1\u09be\u0989\u09a8\u09b2\u09cb\u09a1 \u09b9\u099a\u09cd\u099b\u09c7\u2026'));
-  }).catch(function(){
-    toast(X('No APK found yet. Upload the APK to the GitHub release first.','\u098f\u0996\u09a8\u09cb \u0995\u09cb\u09a8\u09cb APK \u09aa\u09be\u0993\u09af\u09bc\u09be \u09af\u09be\u09af\u09bc\u09a8\u09bf\u0964 \u0986\u0997\u09c7 GitHub release-\u098f APK \u0986\u09aa\u09b2\u09cb\u09a1 \u0995\u09b0\u09c1\u09a8\u0964'));
-    try{window.IQUPD.open();}catch(e){}
-  });}
+function dlLauncher(){try{window.IQUPD.open();}catch(e){}}
 function installApp(){var ios=/iphone|ipad|ipod/i.test(navigator.userAgent);if(DIP){DIP.prompt();DIP.userChoice.then(function(c){if(c&&c.outcome==='accepted')lsS('iq.inst','1');DIP=null;drawSide();nagDraw();});return;}toast(ios?X('Tap Share › Add to Home Screen','Share › Add to Home Screen চাপুন'):X('Browser menu › Install app / Add to Home screen','ব্রাউজার মেনু › Install app / Add to Home screen চাপুন'));}
 function lsG(k){try{return localStorage.getItem(k);}catch(e){return null;}}function lsS(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 function canInstall(){var ios=/iphone|ipad|ipod/i.test(navigator.userAgent);return !installedDone()&&!isStandalone()&&(!!DIP||ios);}
