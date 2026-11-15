@@ -2158,10 +2158,49 @@ function feeMsg(u,r,c,inst){var n=nm(u);return (LANG==='bn'?'সম্মান�
 function lnk(t,h,cls){return E('a',{class:'q-btn '+(cls||''),href:h,target:'_blank',rel:'noopener',style:'text-decoration:none;text-align:center;margin:0'},t);}
 function contactBtns(u,msg){var n=waNum(u),b=[];if(!n)return b;if(u.wa!=='')b.push(lnk('WhatsApp','https://wa.me/'+n+'?text='+encodeURIComponent(msg)));b.push(lnk(X('SMS','এসএমএস'),'sms:+'+(smsNum(u)||n)+'?&body='+encodeURIComponent(msg),'g'));b.push(lnk(X('Call','কল'),'tel:+'+n,'g'));return b;}
 function ovl(title,body){var o=E('div',{id:'pt-rcpt',style:'position:fixed;inset:0;z-index:2147483200;background:#0009;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:16px'}),c=E('div',{class:'qt h1',style:'max-width:440px;width:100%;margin:auto;background:#fff'},E('h3',null,title),body);o.appendChild(c);o.onclick=function(e){if(e.target===o)o.remove();};document.body.appendChild(o);return o;}
-function receipt(r,pay,u,inst){var c=fcalc(r,inst&&inst.plan),row=function(a,b){return E('div',{class:'qrow',style:'justify-content:space-between;flex-wrap:nowrap;margin:4px 0'},E('span',{class:'qm'},a),E('b',null,b));},o;
-  var b=E('div',null,E('div',{class:'qm'},instName(inst)+(inst&&inst.address?' · '+inst.address:'')),row(X('Receipt no.','রসিদ নং'),pay.rcpt||pay.id),row(X('Date','তারিখ'),pay.date),row(X('Student','শিক্ষার্থী'),nm(u)),row(X('Class / Roll','শ্রেণি / রোল'),(u.cls||'-')+' / '+(u.roll||'-')),row(X('Month','মাস'),ymLab(r.ym)),row(X('Method','মাধ্যম'),pay.m),row(X('Amount received','গৃহীত অর্থ'),money(pay.amt)),row(X('Month total','মাসের মোট'),money(c.tot)),row(X('Balance due','অবশিষ্ট বকেয়া'),money(c.bal)),pay.note?row(X('Note','নোট'),pay.note):null,row(X('Received by','গ্রহণকারী'),pay.byName||pay.by||''),issuerSig(pay,inst),
-    E('div',{class:'qgrid qg2',style:'margin-top:12px'},E('button',{class:'q-btn',onclick:function(){window.print();}},X('Print / Save PDF','প্রিন্ট / PDF')),E('button',{class:'q-btn g',onclick:function(){o.remove();}},X('Close','বন্ধ'))));
-  o=ovl(X('Fee receipt','ফি রসিদ'),b);}
+/* receiver is always shown by NAME, never by e-mail */
+function recvName(pay,l){l=l||LANG;var a=l==='en'?(pay.byNameEn||pay.byName):(pay.byName||pay.byNameEn),b=l==='en'?(pay.byName||pay.byNameEn):(pay.byNameEn||pay.byName);a=String(a||'').trim();b=String(b||'').trim();if(a&&a.indexOf('@')<0)return a;if(b&&b.indexOf('@')<0)return b;return '';}
+function recvRole(pay,l){var bn=(l||LANG)==='bn',r=pay.byRole;return r==='teacher'?(bn?'শিক্ষক':'Teacher'):r==='head'?(bn?'প্রধান শিক্ষক':'Head'):r==='admin'?(bn?'অ্যাডমিন':'Admin'):'';}
+function recvResolve(pay){var n=recvName(pay);if(n||!pay.byUid||!S.f)return Promise.resolve(n);
+  return S.f.fs.getDoc(S.f.fs.doc(S.f.db,'users',pay.byUid)).then(function(s){var d=s.exists()?s.data():{};return (LANG==='en'?(d.nameEn||d.nameBn):(d.nameBn||d.nameEn))||'';}).catch(function(){return '';});}
+function loadImgSrc(s){return new Promise(function(res){if(!s)return res(null);var i=new Image();i.onload=function(){res(i);};i.onerror=function(){res(null);};i.src=s;});}
+function receiptBuild(r,pay,u,inst,rn,img,l){return function(P){var F=P.PFONT(),B=function(v){return pdig(P,l,v);},mo=function(n){return (l==='bn'?'৳':'৳')+B((Math.round(n)||0).toLocaleString('en-US'));},
+  T=function(en,bn){return l==='bn'?bn:en;},c0=fcalc(r,inst&&inst.plan),
+  inN=inst?(l==='bn'?(inst.nameBn||inst.nameEn):(inst.nameEn||inst.nameBn)):'',inA=inst?(l==='bn'?(inst.addressBn||inst.address||inst.addressEn):(inst.addressEn||inst.address||inst.addressBn)):'',
+  d=new P.Doc({size:[419.53,595.28],m:28,plain:true,bnf:true,enp:l==='en',foot:(inN||'')+' · '+T('Receipt','রসিদ')+' '+(pay.rcpt||pay.id)});
+  d.title=T('Fee receipt','ফি রসিদ')+' - '+(pay.rcpt||pay.id);
+  var c=d.c,m=d.m,W=d.W,mw=W-2*m,y=d.y;
+  c.textAlign='center';c.fillStyle='#000';
+  if(img){var k=Math.min(44/img.width,44/img.height),w=img.width*k,h=img.height*k;try{c.drawImage(img,W/2-w/2,y,w,h);}catch(e){}y+=h+6;}
+  d.set({s:18,w:700,f:F});c.fillText(inN||orgName(),W/2,y+17);y+=24;
+  var sub=[inA,inst&&inst.phone?T('Phone: ','ফোন: ')+B(inst.phone):'',inst&&inst.eiin?'EIIN '+B(inst.eiin):''].filter(Boolean).join('  ·  ');
+  if(sub){d.set({s:9.5,w:400,f:F});c.fillText(sub,W/2,y+9);y+=14;}
+  y+=6;d.rr(m,y,mw,24,5,'#E9EEF3','#000',.8);d.set({s:13,w:700,f:F,ls:T(1.5,0)});c.fillStyle='#000';c.fillText(T('FEE RECEIPT','ফি রসিদ'),W/2,y+17);y+=34;
+  c.textAlign='left';d.y=y;
+  var kv=function(a,b,bold){if(b==null||b==='')return;d.room(18);var yy=d.y;d.set({s:10,w:500,f:F});c.fillStyle='#444';c.textAlign='left';c.fillText(a,m,yy+11);d.set({s:10.5,w:bold?700:600,f:F});c.fillStyle='#000';c.textAlign='right';
+    var tx=String(b),mx=mw*.62;while(c.measureText(tx).width>mx&&tx.length>3)tx=tx.slice(0,-2);if(tx!==String(b))tx=tx.trim()+'…';c.fillText(tx,W-m,yy+11);c.textAlign='left';c.strokeStyle='#999';c.lineWidth=.4;c.setLineDash([1.5,2]);c.beginPath();c.moveTo(m,yy+16);c.lineTo(W-m,yy+16);c.stroke();c.setLineDash([]);d.y+=18;},
+  sec=function(t){d.y+=4;d.room(22);d.set({s:10,w:700,f:F});c.fillStyle='#000';c.fillText(t,m,d.y+10);d.y+=15;};
+  kv(T('Receipt no.','রসিদ নং'),B(String(pay.rcpt||pay.id||'')),true);kv(T('Date','তারিখ'),B(pay.date||''));
+  sec(T('Student details','শিক্ষার্থীর তথ্য'));
+  var sn1=(l==='bn'?(u.nameBn||u.nameEn):(u.nameEn||u.nameBn))||u.name||'—';
+  kv(T('Name','নাম'),sn1,true);kv(T('Father','পিতা'),u.father||'');kv(T('Class','শ্রেণি'),u.cls?B(u.cls):'');kv(T('Roll / ID','রোল / আইডি'),u.roll?B(u.roll):'');kv(T('Phone','ফোন'),u.phone?B(u.phone):'');
+  sec(T('Payment details','পেমেন্টের তথ্য'));
+  kv(T('Fee month','ফি-এর মাস'),ymLab(r.ym).replace(/[0-9]/g,function(x){return l==='bn'?P.bnDigits(x):x;}));kv(T('Month fee','মাসের ফি'),mo(r.due||0));
+  if(r.disc)kv(T('Discount','ছাড়'),'− '+mo(r.disc));if(c0.fine)kv(T('Fine / extra','জরিমানা / অতিরিক্ত'),mo(c0.fine));
+  kv(T('Month total','মাসের মোট'),mo(c0.tot),true);kv(T('Total paid so far','এ পর্যন্ত মোট জমা'),mo(c0.paid));kv(T('Balance due','অবশিষ্ট বকেয়া'),mo(c0.bal),true);
+  kv(T('Method','মাধ্যম'),pay.m||'');if(pay.note)kv(T('Note','নোট'),pay.note);
+  d.y+=8;d.room(56);var by=d.y;d.rr(m,by,mw,40,6,'#E9EEF3','#000',1);d.set({s:10,w:600,f:F});c.fillStyle='#000';c.textAlign='left';c.fillText(T('Amount received','গৃহীত অর্থ'),m+12,by+16);
+  d.set({s:9,w:500,f:F});c.fillStyle='#333';c.fillText(c0.st==='paid'?T('Status: PAID IN FULL','অবস্থা: সম্পূর্ণ পরিশোধিত'):c0.st==='part'?T('Status: PARTIALLY PAID','অবস্থা: আংশিক পরিশোধিত'):T('Status: DUE','অবস্থা: বকেয়া'),m+12,by+30);
+  d.set({s:22,w:700,f:F});c.fillStyle='#000';c.textAlign='right';c.fillText(mo(pay.amt),W-m-12,by+28);c.textAlign='left';d.y=by+52;
+  kv(T('Received by','গ্রহণকারী'),rn+(recvRole(pay,l)?' ('+recvRole(pay,l)+')':''),true);
+  d.y+=8;d.room(70);var sy=d.y+44,nm0=pay.byRole==='teacher'&&(pay.byNameEn||pay.byName)?(pay.byNameEn||pay.byName):'';
+  IQ_SIGDRAW(c,W-m-80,sy,Object.assign({line:true,w:150},nm0?{name:nm0,title:'Teacher, '+(inst&&(inst.nameEn||inst.nameBn)||'')}:{}));
+  d.set({s:8,w:400,f:F});c.fillStyle='#555';c.textAlign='left';c.fillText(T('This is a computer-generated receipt.','এটি কম্পিউটার-জেনারেটেড রসিদ।'),m,sy+4);
+  d.y=sy+28;return d;};}
+function receipt(r,pay,u,inst){inst=inst||{};var l=LANG,fl='receipt_'+fileOf(String(pay.rcpt||pay.id||'x'))+'_'+fileOf(String(u.roll||u.nameEn||'student'));
+  var P=window.IQQUIZ&&IQQUIZ._pdf;if(!P){toast(X('PDF engine did not load','PDF ইঞ্জিন লোড হয়নি'));return;}
+  toast(X('Preparing receipt…','রসিদ তৈরি হচ্ছে…'));
+  P.previewDoc(function(){return Promise.all([recvResolve(pay),loadImgSrc(inst.logo).then(function(i){return i||loadBrand();})]).then(function(a){return receiptBuild(r,pay,u,inst,a[0]||X('Office','অফিস'),a[1],l)(P);});},fl,X('Fee receipt','ফি রসিদ'));}
 function instPick(m,fn){if(S.head||!S.admin){fn();return;}var sel=E('select',{class:'q-in',onchange:function(){S.fi=this.value;go(S.view,S.params);}},E('option',{value:''},'— '+X('Select institution','প্রতিষ্ঠান বাছুন')+' —'));(S.insts||[]).forEach(function(i){sel.appendChild(E('option',{value:i.id},instName(i)));});sel.value=S.fi||'';m.appendChild(sel);if(!S.fi){m.appendChild(empty(X('Create or choose an institution first.','আগে প্রতিষ্ঠান বানান বা বাছুন।')));return;}fn();}
 function feeDocs(q){var f=S.f;return f.fs.getDocs(f.fs.query.apply(null,[f.fs.collection(f.db,'fees')].concat(q))).then(function(s){var a=[];s.forEach(function(d){a.push(Object.assign({id:d.id},d.data()));});return a;});}
 function payThanks(r,p,u,inst){if(!p)return;var c=fcalc(r,inst&&inst.plan),f=S.f,n=callName(u),full=c.bal<=0&&c.tot>0,mo=ymLab(r.ym);
@@ -2213,7 +2252,7 @@ function ledger(m,u,inst){var f=S.f,box=E('div');m.appendChild(box);box.appendCh
     box.appendChild(E('div',{class:'qstat'},E('div',null,E('b',null,money(T)),E('span',null,X('Billed','মোট দাবি'))),E('div',null,E('b',null,money(P)),E('span',null,X('Paid','পরিশোধিত'))),E('div',null,E('b',null,money(Math.max(0,T-P))),E('span',null,X('Due','বকেয়া')))));
     var lp=a[0];if(S.mode==='student'&&lp&&fcalc(lp,inst&&inst.plan).st==='paid')box.appendChild(E('div',{class:'qt h1',style:'text-align:center'},E('div',{style:'font-size:36px'},'\uD83C\uDF89'),E('b',null,X('Congratulations, ','অভিনন্দন, ')+callName(u)+'!'),E('div',{class:'qm'},ymLab(lp.ym)+' '+X('fee is fully paid. Thank you!','মাসের ফি সম্পূর্ণ পরিশোধিত। ধন্যবাদ!'))));
     a.forEach(function(r,i){var c=fcalc(r,inst&&inst.plan),cd=E('div',{class:'qt h'+(i%4)},E('div',{class:'qrow2',style:'flex-wrap:nowrap'},E('b',null,ymLab(r.ym)),E('span',{class:'qpill '+(c.st==='paid'?'on':'off')},{paid:X('Paid','পরিশোধিত'),part:X('Partial','আংশিক'),due:X('Unpaid','অনাদায়ী')}[c.st])),E('div',{class:'qm'},X('Fee ','ফি ')+money(r.due)+(r.disc?' − '+money(r.disc):'')+(c.fine?' + '+money(c.fine):'')+' = '+money(c.tot)+' · '+X('Balance ','বাকি ')+money(c.bal)));
-      (r.pays||[]).forEach(function(py){cd.appendChild(E('div',{class:'qrow',style:'justify-content:space-between;flex-wrap:nowrap;margin-top:6px'},E('span',{class:'qm'},py.date+' · '+py.m+' · '+money(py.amt)+' · '+X('Receipt ','রসিদ ')+(py.rcpt||py.id)+((S.head||S.admin)&&(py.byName||py.by)?' · '+X('By ','গ্রহণ: ')+(py.byName||py.by):'')),E('button',{class:'q-btn g',style:'margin:0',onclick:function(){receipt(r,py,u,inst||{});}},X('Receipt','রসিদ'))));});box.appendChild(cd);});}).catch(fail);}
+      (r.pays||[]).forEach(function(py){cd.appendChild(E('div',{class:'qrow',style:'justify-content:space-between;flex-wrap:nowrap;margin-top:6px'},E('span',{class:'qm'},py.date+' · '+py.m+' · '+money(py.amt)+' · '+X('Receipt ','রসিদ ')+(py.rcpt||py.id)+(recvName(py)?' · '+X('By ','গ্রহণ: ')+recvName(py):'')),E('button',{class:'q-btn g',style:'margin:0',onclick:function(){receipt(r,py,u,inst||{});}},X('Receipt','রসিদ'))));});box.appendChild(cd);});}).catch(fail);}
 V.myfees=function(m){head(m,X('My fees','আমার ফি'),X('Monthly fee record and receipts','মাসিক ফি রেকর্ড ও রসিদ'));var u=S.prof,inst=(S.insts||[]).filter(function(i){return i.id===u.instId;})[0]||null;if(!u.instId){m.appendChild(empty(X('No institution is linked to your profile yet.','আপনার প্রোফাইলে এখনো কোনো প্রতিষ্ঠান যুক্ত নেই।')));return;}ledger(m,Object.assign({},u,{uid:S.u.uid}),inst);};
 V.feeplan=function(m){head(m,X('Fee setup','ফি সেটআপ'),instName(curInst()));instPick(m,function(){var inst=curInst(),f=S.f,pl=inst.plan||{},tu={};m.appendChild(E('div',{class:'qhint'},X('Monthly tuition per class, due day of each month and an optional late fine.','শ্রেণিভিত্তিক মাসিক বেতন, প্রতি মাসের শেষ তারিখ ও ঐচ্ছিক বিলম্ব জরিমানা।')));
   var bx=E('div',{class:'qt h1'});S.st.classes.forEach(function(c){tu[c]=E('input',{class:'q-in',type:'number',inputmode:'decimal',value:(pl.tuition||{})[c]||'',placeholder:'0'});bx.appendChild(E('label',{class:'pt-lab'},clsLab(c)+' — '+X('monthly fee','মাসিক ফি')));bx.appendChild(tu[c]);});
