@@ -22,7 +22,7 @@
 <style id="iq-formal">
 /* ===== FORMAL THEME: navy + gold, serif headings. Delete this whole block to go back to the old look ===== */
 body .qv{--act:#1B3A6B;--act-hi:#2F5597;--act-deep:#12284C;--act-soft:#E9EEF7;--act-line:#C3CFE4;--gold:#B08A3E;--bg:#F5F3EE;--ink:#14213D;--ink2:#46526B;--ink3:#7A8398;--line:#E2DED3;--shadow:0 1px 2px rgba(20,33,61,.05),0 10px 28px -16px rgba(20,33,61,.22);--fd:Georgia,"Times New Roman","Hind Siliguri","Noto Serif Bengali",serif;background:var(--bg)}
-body{background:#F5F3EE}
+body{background:#F4F0E8}
 body .qv h1,body .qv h2,body .qv h3{font-family:var(--fd);font-weight:600;letter-spacing:.01em;color:var(--act-deep)}
 body .qv .qt{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
 body .qv .qt.h0,body .qv .qt.h1,body .qv .qt.h2,body .qv .qt.h3{background:#fff;border-left:3px solid var(--gold)}
@@ -2139,7 +2139,7 @@ function loadSt(){var f=S.f;return f.fs.getDoc(f.fs.doc(f.db,'settings','marking
 var ICO={home:[158,'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'],results:[38,'M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3'],join:[200,'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1'],profile:[262,'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0'],exams:[222,'M7 3h8l4 4v14H7zM15 3v4h4M10 12h6M10 16h6'],marks:[18,'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4'],studio:[285,'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z'],approvals:[145,'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM8.5 12l2.5 2.5 4.5-5'],students:[215,'M2 9l10-5 10 5-10 5zM6 11.5V16c0 1.5 3 3 6 3s6-1.5 6-3v-4.5'],teachers:[330,'M3 4h18v12H3zM8 20h8M12 16v4M7 9h5M7 12h8'],settings:[225,'M4 7h9M17 7h3M4 17h3M11 17h9M15 5v4M9 15v4'],sview:[190,'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6'],notices:[48,'M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4'],compose:[10,'M3 11v3l12 5V6zM15 8h2a3 3 0 0 1 0 6h-2M6 14l1 5h3'],queries:[170,'M4 5h16v11H9l-5 4z'],update:[240,'M12 4v11M7.5 11 12 15.5 16.5 11M5 20h14'],lang:[205,'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18'],viewas:[275,'M8 8h12v12H8zM4 16V4h12'],inst:[250,'M4 21V5l8-2 8 2v16M9 9h2M13 9h2M9 13h2M13 13h2M10 21v-4h4v4'],fees:[150,'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l2-3h12M16 13.5h2'],arrow:[0,'M5 12h14M13 6l6 6-6 6']},
 ICM={0x1F3E0:'home',0x1F3C6:'results',0x1F517:'join',0x1F464:'profile',0x1F4DD:'exams',0x270D:'marks',0x1F9E9:'studio',0x2705:'approvals',0x1F393:'students',0x1F469:'teachers',0x2699:'settings',0x1F440:'sview',0x1F514:'notices',0x1F4E2:'compose',0x1F4AC:'queries',0x2B07:'update',0x1F310:'lang'};
 function ic(k){var n=ICO[k]?k:(ICM[(k||'').codePointAt(0)]||'home'),d=ICO[n],s=document.createElement('span'),h=d[0];s.className='pt-ic'+(n==='arrow'?' pt-arr':'');s.style.cssText='--h:'+h;
-  s.innerHTML='<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="'+d[1]+'"/></svg>';return s;}
+  s.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="'+d[1]+'"/></svg>';return s;}
 function phLine(u){var a=[];if(u.phone)a.push(u.phone+(u.wa==='phone'?' · WhatsApp':''));if(u.phone2)a.push(u.phone2+(u.wa==='phone2'?' · WhatsApp':''));return a.join('  |  ');}
 /* ===== institutions, head, fees ===== */
 function loadInsts(){var f=S.f;return f.fs.getDocs(f.fs.collection(f.db,'institutions')).then(function(s){S.insts=[];s.forEach(function(d){S.insts.push(Object.assign({id:d.id},d.data()));});},function(){S.insts=[];});}
@@ -2663,6 +2663,10 @@ function welcome(){root.innerHTML='';var n=0,t0=0;
 function roleScreen(){var r=null;try{r=sessionStorage.getItem('pt.role');}catch(e){}   return regScreen(r==='teacher'?'teacher':'student');}
   function photoFrom(file){return new Promise(function(res,rej){var u=URL.createObjectURL(file),im=new Image();im.onload=function(){var k=Math.min(1,220/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(im.width*k));cv.height=Math.max(1,Math.round(im.height*k));var c=cv.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,cv.width,cv.height);c.drawImage(im,0,0,cv.width,cv.height);URL.revokeObjectURL(u);res(cv.toDataURL('image/jpeg',.72));};im.onerror=rej;im.src=u;});}
 function pv(u,k){var a=LANG==='bn'?'Bn':'En',b=LANG==='bn'?'En':'Bn';return u[k+a]||u[k+b]||u[k]||'';}
+function personRow(u){var a=[],st=u.role==='student';
+  a.push(st?[u.cls?clsLab(u.cls):'',u.roll?X('Roll ','রোল ')+u.roll:''].filter(Boolean).join(' · '):[u.roll?X('ID ','আইডি ')+u.roll:'',pv(u,'designation')].filter(Boolean).join(' · '));
+  a.push([pv(u,'inst'),u.phone||''].filter(Boolean).join(' · '));a.push(u.email||'');
+  return E('div',{class:'pcr'},avatar(u,38),E('div',null,E('b',null,nm(u)),a.filter(Boolean).map(function(x){return E('div',{class:'qm'},x);})));}
 function personCard(u){var l=[];
   if(u.role==='student'){l.push([u.cls?clsLab(u.cls)+(verTxt(u)?' ('+verTxt(u)+')':''):'',u.roll?X('Roll ','রোল ')+u.roll:'',pv(u,'nick')?X('Nickname: ','ডাকনাম: ')+pv(u,'nick'):''].filter(Boolean).join(' \u00B7 '));l.push(pv(u,'inst'));l.push(pv(u,'father')?X('Father: ','পিতা: ')+pv(u,'father'):'');l.push(pv(u,'mother')?X('Mother: ','মাতা: ')+pv(u,'mother'):'');l.push(pv(u,'address'));l.push(phLine(u));}
   else{l.push(u.roll?X('ID No ','আইডি নং ')+u.roll:'');l.push(pv(u,'designation'));l.push(pv(u,'inst'));l.push(phLine(u));l.push(pv(u,'subjects')?X('Subjects: ','বিষয়: ')+pv(u,'subjects'):'');l.push(pv(u,'address'));}
@@ -2898,10 +2902,10 @@ function people(m,role,o){head(m,o.title,o.sub);var f=S.f,box=E('div'),list=E('d
     if(role==='student'){var cs=E('select',{class:'q-in',style:'width:auto',onchange:function(){cl=this.value;draw();}},E('option',{value:''},'\u09B8\u09AC \u09B6\u09CD\u09B0\u09C7\u09A3\u09BF'));S.st.classes.forEach(function(c){cs.appendChild(E('option',{value:c},'\u09B6\u09CD\u09B0\u09C7\u09A3\u09BF '+c));});row.appendChild(cs);}
     box.appendChild(row);box.appendChild(list);draw();}).catch(fail);
   function draw(){list.innerHTML='';var n=0;cur=[];data.forEach(function(u,i){if(st!=='all'&&u.status!==st)return;if(cl&&u.cls!==cl)return;if(q&&(nm(u)+' '+(u.nameEn||'')+' '+(u.roll||'')+' '+(u.email||'')).toLowerCase().indexOf(q)<0)return;n++;cur.push(u);
-      var b=E('div',{class:'qgrid qg3'});b.appendChild(E('button',{class:'q-btn g',onclick:function(){idCards([u]);}},X('ID card','আইডি কার্ড')));if(S.head&&!S.admin&&u.status==='pending')b.appendChild(E('button',{class:'q-btn',onclick:function(){f.fs.updateDoc(f.fs.doc(f.db,'users',u.uid),{status:'approved',approvedAt:Date.now(),approvedBy:S.u.email||'',reason:''}).then(function(){toast(X('Approved','অনুমোদিত'));go(S.view);},function(e){toast(errMsg(e));});}},'✓ '+X('Approve','অনুমোদন')));if(S.head&&!S.admin&&u.manual)b.appendChild(E('button',{class:'q-btn r',onclick:function(){captchaDel(nm(u),function(){f.fs.deleteDoc(f.fs.doc(f.db,'users',u.uid)).then(function(){go(S.view);},function(e){toast(errMsg(e));});});}},X('Delete','মুছুন')));
+      var b=E('div',{class:'pcb'});b.appendChild(E('button',{class:'q-btn g',onclick:function(){idCards([u]);}},X('ID card','আইডি কার্ড')));if(S.head&&!S.admin&&u.status==='pending')b.appendChild(E('button',{class:'q-btn',onclick:function(){f.fs.updateDoc(f.fs.doc(f.db,'users',u.uid),{status:'approved',approvedAt:Date.now(),approvedBy:S.u.email||'',reason:''}).then(function(){toast(X('Approved','অনুমোদিত'));go(S.view);},function(e){toast(errMsg(e));});}},'✓ '+X('Approve','অনুমোদন')));if(S.head&&!S.admin&&u.manual)b.appendChild(E('button',{class:'q-btn r',onclick:function(){captchaDel(nm(u),function(){f.fs.deleteDoc(f.fs.doc(f.db,'users',u.uid)).then(function(){go(S.view);},function(e){toast(errMsg(e));});});}},X('Delete','মুছুন')));
       if(role==='student')b.appendChild(E('button',{class:'q-btn',onclick:function(){go('sprofile',{u:u,from:o.view?'sview':'students'});}},'\u09B9\u09CB\u09AE \u09A6\u09C7\u0996\u09C1\u09A8'));
       if(!o.view){b.appendChild(E('button',{class:'q-btn g',onclick:function(){go('pedit',{u:u});}},'\u09B8\u09AE\u09CD\u09AA\u09BE\u09A6\u09A8\u09BE'));b.appendChild(E('button',{class:'q-btn r',onclick:function(){captchaDel(nm(u),function(){f.fs.deleteDoc(f.fs.doc(f.db,'users',u.uid)).then(function(){go(S.view);},function(){toast('\u09AE\u09CB\u099B\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF');});});}},'\u09AE\u09C1\u099B\u09C1\u09A8'));}
-      list.appendChild(E('div',{class:'qt h'+(i%4)},E('span',{class:'qpill '+(u.status==='approved'?'on':'off')},{approved:'\u0985\u09A8\u09C1\u09AE\u09CB\u09A6\u09BF\u09A4',pending:'\u0985\u09AA\u09C7\u0995\u09CD\u09B7\u09AE\u09BE\u09A3',rejected:'\u09AC\u09BE\u09A4\u09BF\u09B2'}[u.status]||u.status),personCard(u),E('div',{class:'qm'},u.email),b));});
+      list.appendChild(E('div',{class:'qt pcl h'+(i%4)},E('span',{class:'qpill '+(u.status==='approved'?'on':'off')},{approved:'\u0985\u09A8\u09C1\u09AE\u09CB\u09A6\u09BF\u09A4',pending:'\u0985\u09AA\u09C7\u0995\u09CD\u09B7\u09AE\u09BE\u09A3',rejected:'\u09AC\u09BE\u09A4\u09BF\u09B2'}[u.status]||u.status),personRow(u),b));});
     if(!n)list.appendChild(empty('\u0995\u09BE\u0989\u0995\u09C7 \u09AA\u09BE\u0993\u09AF\u09BC\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964'));}}
 V.students=function(m){people(m,'student',{title:'\u09B6\u09BF\u0995\u09CD\u09B7\u09BE\u09B0\u09CD\u09A5\u09C0 \u09A4\u09BE\u09B2\u09BF\u0995\u09BE',sub:'\u09AA\u09CD\u09B0\u09CB\u09AB\u09BE\u0987\u09B2 \u09A6\u09C7\u0996\u09C1\u09A8, \u09B8\u09AE\u09CD\u09AA\u09BE\u09A6\u09A8\u09BE \u0995\u09B0\u09C1\u09A8, \u09B0\u09CB\u09B2 \u09A6\u09BF\u09A8'});};
 V.teachers=function(m){people(m,'teacher',{title:'\u09B6\u09BF\u0995\u09CD\u09B7\u0995 \u09A4\u09BE\u09B2\u09BF\u0995\u09BE'});};
@@ -3060,7 +3064,7 @@ function entry(area,ex,sub,studs,mk,all,nextSub){area.innerHTML='';mkCss();all=a
     sub.parts.forEach(function(pt){var inp=E('input',{class:'q-in',type:'number',min:0,max:pt.max,step:'any',inputmode:'decimal',placeholder:String(pt.max),value:(e.p&&e.p[pt.id]!=null)?String(e.p[pt.id]):'',oninput:upd2});inp.setAttribute('enterkeyhint','next');inp.onkeydown=function(ev){if(ev.key==='Enter'){ev.preventDefault();focusNext(inp);}};r.inputs[pt.id]=inp;cells.appendChild(E('label',null,sub.parts.length>1?E('small',null,pt.name+' ('+pt.max+')'):null,inp));});
     r.ab=E('input',{type:'checkbox',checked:!!e.ab,onchange:upd2});r.rem=E('input',{class:'q-in',placeholder:'শিক্ষকের মন্তব্য (ঐচ্ছিক)',value:(mk[u.uid]||{}).rem||'',oninput:function(){r.dirty=true;dSoon();}});
     rb=E('div',{class:'mk-rem'+(r.rem.value?' on':'')},r.rem);
-    r.card=E('div',{class:'mk-r'+(sub.parts.length>1?' multi':'')},E('div',{class:'mk-n'},avatar(u,34),E('div',{style:'min-width:0'},E('b',null,nm(u),fresh?E('span',{class:'mk-new'},X('added','যোগ')):null),E('div',{class:'qm',style:'margin:0'},[u.roll?X('Roll ','রোল ')+u.roll:'',u.cls?(X('Class ','শ্রেণি ')+u.cls):''].filter(Boolean).join(' · ')),tot)),cells,E('div',{class:'mk-x'},E('label',{class:'mk-ab'},r.ab,X('Absent','অনুপ.')),E('button',{class:'mk-c',type:'button','aria-label':X('Remark','মন্তব্য'),onclick:function(){rb.classList.toggle('on');}},'💬')),rb);
+    r.card=E('div',{class:'mk-r'+(sub.parts.length>1?' multi':'')},E('div',{class:'mk-n'},avatar(u,28),E('div',{style:'min-width:0'},E('b',null,nm(u),fresh?E('span',{class:'mk-new'},X('added','যোগ')):null),E('div',{class:'qm',style:'margin:0'},[u.roll?X('Roll ','রোল ')+u.roll:'',u.cls?(X('Class ','শ্রেণি ')+u.cls):''].filter(Boolean).join(' · ')),tot)),cells,E('div',{class:'mk-x'},E('label',{class:'mk-ab'},r.ab,X('Absent','অনুপ.')),E('button',{class:'mk-c',type:'button','aria-label':X('Remark','মন্তব্য'),onclick:function(){rb.classList.toggle('on');}},ic('queries'))),rb);
     r.key=keyOf(u);if(S.admin){r.au=E('div',{class:'pt-au'});r.card.appendChild(r.au);r.leg=e;drawAu(r);}
     var t0=0;sub.parts.forEach(function(pt){if(e.p&&e.p[pt.id]!=null)t0+=+e.p[pt.id];});tot.textContent=e.ab?X('Absent','অনুপস্থিত'):(t0+' / '+maxS);return r;}
   studs.forEach(function(u){var r=makeRow(u);rows.push(r);list.appendChild(r.card);});
@@ -3663,7 +3667,7 @@ function upBtn(){if(UP.st==='dl'||UP.st==='checking'||UP.st==='inst')return null
   if(isNat())return upAvail()?[X('Update now','এখনই আপডেট করুন'),0]:[X('Check for update','আপডেট দেখুন'),1];
   return UI.a?[X('Download APK','APK ডাউনলোড'),0]:[X('Check again','আবার দেখুন'),1];}
 function upPaint(){if(!UT)return;var busy=UP.st==='dl'||UP.st==='inst',b=upBtn(),nw=upAvail()&&!busy&&UP.st!=='err';
-  UT.r.className='iqup'+(nw?' new':'')+(UP.st==='err'?' err':'');
+  var op=!!UP.open||busy;UT.r.className='iqup'+(nw?' new':'')+(UP.st==='err'?' err':'')+(op?' open':'');try{UT.r.firstChild.setAttribute('aria-expanded',op?'true':'false');}catch(e){}
   UT.sub.textContent=upSub();UT.ago.textContent=UP.st==='idle'&&!UP.msg?upAgo():'';UT.ago.style.display=UT.ago.textContent?'block':'none';
   UT.nw.style.display=nw?'':'none';
   UT.bar.style.display=busy?'':'none';UT.nt.style.display=busy?'flex':'none';
@@ -3678,7 +3682,8 @@ function upTile(){var T={};
   T.fill=E('i',{class:'iqup-fill'});T.bar=E('div',{class:'iqup-bar'},T.fill);
   T.n1=E('span',null,'');T.n2=E('span',null,'');T.nt=E('div',{class:'iqup-n'},T.n1,T.n2);
   T.btn=E('button',{class:'iqup-b',onclick:function(){upAct();}},'');
-  T.r=E('div',{class:'iqup'},E('div',{class:'iqup-h'},ic('update'),E('div',null,E('b',null,isNat()?X('App update','অ্যাপ আপডেট'):X('Get the Android app','অ্যান্ড্রয়েড অ্যাপ নিন')),T.sub,T.ago),T.nw),T.bar,T.nt,T.btn);
+  T.chev=ic('arrow');T.chev.classList.add('iqup-chev');
+  T.r=E('div',{class:'iqup'},E('button',{type:'button','aria-expanded':'false',class:'iqup-h iqup-t',onclick:function(){UP.open=!UP.open;upPaint();}},ic('update'),E('div',null,E('b',null,isNat()?X('App update','অ্যাপ আপডেট'):X('Get the Android app','অ্যান্ড্রয়েড অ্যাপ নিন'))),T.nw,T.chev),E('div',{class:'iqup-body'},T.sub,T.ago,T.bar,T.nt,T.btn));
   UT=T;upPaint();return T.r;}
 function upAct(){if(UP.st==='dl'||UP.st==='checking'||UP.st==='inst')return;var a=UI.a;
   if(UP.st!=='err'&&(isNat()?upAvail():!!a)){upGo(a.url,a.size);return;}
@@ -4067,5 +4072,109 @@ service cloud.firestore {
 (function(){try{var C=window.Capacitor;if(C&&C.isNativePlatform&&C.isNativePlatform())return;
 if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}}catch(e){}})();
 </script>
+<style id="iq-v10">
+/* ===== v10 · formal premium layer (cream canvas, soft white cards, pastel line icons) ===== */
+body .qv{--act:#4338A8;--act-hi:#5B4FD0;--act-deep:#2A2370;--act-soft:#EFEDFB;--act-line:#CFCBF0;--bg:#F4F0E8;--ink:#1B1F3B;--ink2:#4A4F68;--ink3:#80839A;--line:#E8E2D4;--fd:var(--f);--shadow:0 1px 2px rgba(27,31,59,.04),0 8px 24px -14px rgba(27,31,59,.18);background:var(--bg)}
+body .qv h1,body .qv h2,body .qv h3{font-family:var(--f);font-weight:700;letter-spacing:-.01em;color:var(--ink)}
+body .qv .pt-top{background:rgba(252,249,243,.94);backdrop-filter:blur(10px);border-bottom:0;box-shadow:0 1px 0 var(--line),0 8px 18px -14px rgba(27,31,59,.3)}
+body .qv .pt-top b{font:700 18px var(--f);letter-spacing:-.01em;color:var(--ink)}
+/* cards */
+body .qv .qt,body .qv .qt.h0,body .qv .qt.h1,body .qv .qt.h2,body .qv .qt.h3{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:14px 16px}
+body .qv .qt::after{display:none}
+body .qv button.qt{background:hsl(var(--h) 40% 97.5%);border-color:hsl(var(--h) 28% 88%)}
+body .qv .qstat>div{border-radius:14px}
+body .qv .hm-hero{background:linear-gradient(135deg,#2A2370,#4338A8);border-radius:20px;box-shadow:var(--shadow)}
+body .qv .qsec{font:700 11px var(--f);letter-spacing:.12em;color:var(--ink3);border-bottom:0;padding:12px 2px 4px}
+/* buttons and fields */
+body .qv .q-btn{background:var(--act);background-image:none;color:#fff;border:1px solid var(--act);border-radius:10px;box-shadow:0 1px 2px rgba(27,31,59,.12);font-weight:600;letter-spacing:.01em}
+body .qv .q-btn.g{background:#fff;color:var(--act-deep);border:1px solid var(--act-line);box-shadow:none}
+body .qv .q-btn.r{background:#fff;color:#B4233A;border:1px solid #F0C6CE;box-shadow:none}
+body .qv .q-in{border-radius:10px;border:1px solid #DDD6C6}
+body .qv .qpill.on{background:#E8F5EE;color:#0F6B45;border-color:#BFE3CF}
+/* icons: pastel circle, fine line */
+body .qv .pt-ic{width:32px;height:32px;border-radius:50%;background:hsl(var(--h) 62% 94%);color:hsl(var(--h) 50% 36%);box-shadow:none}
+body .qv .pt-ic.pt-arr{background:none;width:auto;height:auto;color:inherit}
+body .qv .pt-prem .pt-ic{background:rgba(255,255,255,.16);color:#fff}
+body .qv .pt-nav.on .pt-ic{background:var(--act);color:#fff;transform:none}
+/* sidebar: light */
+body .qv .pt-side{background:#FBF8F2;border-right:1px solid var(--line);color:var(--ink2);box-shadow:0 0 40px -20px rgba(27,31,59,.35)}
+body .qv .pt-brand b,body .qv .pt-hi{font-family:var(--f);color:var(--ink)}
+body .qv .pt-side .qm{color:var(--ink3)}
+body .qv .pt-side .qsec{color:var(--ink3);font-size:10.5px;letter-spacing:.12em;padding:14px 10px 4px}
+body .qv .pt-nav{color:var(--ink2);border-radius:12px;padding:7px 10px;font-weight:600}
+body .qv .pt-nav:hover{background:rgba(67,56,168,.06)}
+body .qv .pt-nav.on{background:var(--act-soft);color:var(--act-deep);box-shadow:none}
+body .qv .pt-side .q-btn.g{background:#fff;color:var(--ink2);border:1px solid var(--line)}
+/* app / update tile: collapsed until tapped */
+body .qv .iqup{padding:0;margin:8px 0;border-radius:14px;overflow:hidden;background:#fff;border:1px solid var(--line)}
+body .qv .iqup.new{background:var(--act-soft);border-color:var(--act-line)}
+body .qv .iqup-t{width:100%;display:flex;gap:10px;align-items:center;padding:7px 10px;border:0;background:transparent;cursor:pointer;text-align:left;font-family:inherit}
+body .qv .iqup-new{background:var(--act)}
+body .qv .iqup-chev{flex:none;color:var(--ink3);transition:transform .2s}
+body .qv .iqup.open .iqup-chev{transform:rotate(90deg)}
+body .qv .iqup-body{display:none;padding:0 12px 12px}
+body .qv .iqup.open .iqup-body{display:block}
+body .qv .iqup-b{background:var(--act);border-radius:10px}
+body .qv .iqup-b.g{background:transparent;color:var(--act-deep);border:1px solid var(--act-line)}
+/* student / teacher list: compact rows */
+body .qv .qt.pcl{position:relative;padding:10px 12px;margin:8px 0;border-radius:14px}
+body .qv .pcl .qpill{position:absolute;top:10px;right:10px;margin:0;padding:1px 8px;font-size:10.5px}
+body .qv .pcr{display:flex;gap:10px;align-items:center;min-width:0;padding-right:74px}
+body .qv .pcr>div{min-width:0;flex:1}
+body .qv .pcr b{display:block;font:700 14px/1.3 var(--f);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body .qv .pcr .qm{font-size:11.5px;line-height:1.35;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body .qv .pcb{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+body .qv .pcl .pcb .q-btn{margin:0;padding:4px 11px;font-size:12px;line-height:1.4;border-radius:8px;box-shadow:none}
+/* marks entry: tighter rows */
+body .qv .mk-r{padding:6px 8px;gap:4px 8px}
+body .qv .mk-n{gap:8px}
+body .qv .mk-n b{font-size:13px;line-height:1.2}
+body .qv .mk-n .qm{font-size:11px;line-height:1.2}
+body .qv .mk-t{font-size:11px}
+body .qv .mk-in input{width:58px;padding:6px 4px;font-size:14px;border-radius:8px}
+body .qv .mk-c .pt-ic{width:26px;height:26px}
+
+/* ===== v11 · gentle motion ===== */
+:root{--iq-ease:cubic-bezier(.22,.8,.24,1)}
+@keyframes iqmUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes iqmFade{from{opacity:0}to{opacity:1}}
+@keyframes iqmPop{from{opacity:0;transform:scale(.97) translateY(6px)}to{opacity:1;transform:none}}
+@keyframes iqmSheet{from{transform:translateY(28px);opacity:.6}to{transform:none;opacity:1}}
+@keyframes iqmSlide{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+@keyframes iqmOpen{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+/* every page: content rises in, cards follow one after another */
+body .qv .pt-in>*{animation:iqmUp .26s var(--iq-ease) both}
+body .qv .pt-in>*:nth-child(2){animation-delay:.02s}body .qv .pt-in>*:nth-child(3){animation-delay:.04s}
+body .qv .pt-in>*:nth-child(4){animation-delay:.05s}body .qv .pt-in>*:nth-child(n+5){animation-delay:.06s}
+body .qv .pt-in>*>.qt,body .qv .pt-in>*>*>.qt,body .qv .pt-in>*>.qstat>div{animation:iqmPop .24s var(--iq-ease) both}
+body .qv .pt-in .qt:nth-child(2){animation-delay:.025s}body .qv .pt-in .qt:nth-child(3){animation-delay:.05s}
+body .qv .pt-in .qt:nth-child(4){animation-delay:.075s}body .qv .pt-in .qt:nth-child(5){animation-delay:.1s}
+body .qv .pt-in .qt:nth-child(n+6){animation-delay:.1s}
+/* touch feedback: soft lift on tiles and cards, gentle press on buttons */
+body .qv .qt,body .qv .q-btn,body .qv .pt-nav,body .qv .iqup,body .qv .qpill{transition:transform .22s var(--iq-ease),box-shadow .25s,background-color .2s,border-color .2s,color .2s}
+body .qv button.qt:active{transform:scale(.98)}
+@media(hover:hover){body .qv button.qt:hover,body .qv .qt.pcl:hover{transform:translateY(-2px);box-shadow:0 12px 26px -16px rgba(27,31,59,.3)}body .qv .q-btn:hover{transform:translateY(-1px)}}
+body .qv .q-btn:active{transform:scale(.96)}
+/* sidebar: items glide in when it opens, active icon settles */
+body .qv .pt-side.open .pt-nav,body .qv .pt-side.open .pt-brand{animation:iqmSlide .24s var(--iq-ease) both}
+body .qv .pt-side.open .pt-nav:nth-of-type(2){animation-delay:.015s}body .qv .pt-side.open .pt-nav:nth-of-type(3){animation-delay:.03s}
+body .qv .pt-side.open .pt-nav:nth-of-type(4){animation-delay:.045s}body .qv .pt-side.open .pt-nav:nth-of-type(5){animation-delay:.06s}
+body .qv .pt-side.open .pt-nav:nth-of-type(n+6){animation-delay:.07s}
+body .qv .pt-back{opacity:0;transition:opacity .25s}body .qv .pt-back.on{opacity:1}
+body .qv .pt-ic{transition:background-color .25s,color .25s,transform .25s var(--iq-ease)}
+body .qv .pt-nav:hover .pt-ic{transform:scale(1.06)}
+/* expanding app tile */
+body .qv .iqup.open .iqup-body{animation:iqmOpen .2s var(--iq-ease) both}
+body .qv .iqup-chev{transition:transform .28s var(--iq-ease)}
+/* sheets, dialogs, progress and marks */
+body .qshade{animation:iqmFade .22s both}
+body .qsheet{animation:iqmSheet .26s var(--iq-ease) both}
+.iqx-ov>*{animation:iqmPop .26s var(--iq-ease) both}
+body .qv .mk-r{transition:background-color .25s,box-shadow .25s,opacity .25s}
+body .qv .mk-prog i,body .qv .iqup-fill{transition:width .5s var(--iq-ease)}
+body .qv .qpill{animation:iqmFade .4s both}
+@media(prefers-reduced-motion:reduce){body .qv *,body .qshade,body .qsheet,.iqx-ov>*{animation:none!important;transition-duration:.01ms!important}}
+
+</style>
 </body>
 </html>
